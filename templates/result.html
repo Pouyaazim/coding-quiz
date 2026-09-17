@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Coding Quiz</title>
+    <title>نتیجه</title>
     <style>
         body {
             font-family: Tahoma, sans-serif;
@@ -19,15 +19,23 @@
             padding: 40px 60px;
             border-radius: 20px;
             text-align: center;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+        }
+        .correct {
+            color: #4ade80;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .wrong {
+            color: #f87171;
+            font-size: 3rem;
+            margin-bottom: 10px;
         }
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            margin: 10px 0;
         }
         p {
             color: #94a3b8;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
         a {
             display: inline-block;
@@ -37,33 +45,27 @@
             color: white;
             text-decoration: none;
             border-radius: 10px;
-            font-size: 1rem;
         }
         a:hover {
             background: #2563eb;
-        }
-        .gray {
-            background: #475569;
-        }
-        .gray:hover {
-            background: #334155;
         }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>🎮 Coding Quiz</h1>
-
-        {% if user %}
-            <p>خوش اومدی، <strong>{{ user.username }}</strong>! 🎉</p>
-            <p>امتیاز: {{ user.xp }} | سطح: {{ user.level }}</p>
-	    <a href="/quiz">شروع کوییز 🎮</a>
-            <a href="/logout" class="gray">خروج</a>
+        {% if is_correct %}
+            <div class="correct">✅</div>
+            <h1>درست بود!</h1>
+            <p>+{{ xp_reward }} XP گرفتی 🎉</p>
+            <p>امتیاز کل: {{ new_xp }} | سطح: {{ new_level }}</p>
         {% else %}
-            <p>به بازی-آموزش برنامه‌نویسی خوش اومدی!</p>
-            <a href="/register">ثبت‌نام</a>
-            <a href="/login" class="gray">ورود</a>
+            <div class="wrong">❌</div>
+            <h1>اشتباه بود</h1>
+            <p>جواب درست: <strong>{{ correct_answer }}</strong></p>
+            <p>امتیاز کل: {{ new_xp }}</p>
         {% endif %}
+
+        <a href="/quiz">سوال بعدی</a>
     </div>
 </body>
 </html>
