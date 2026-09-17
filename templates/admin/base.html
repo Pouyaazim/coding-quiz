@@ -69,10 +69,16 @@
 <body>
     <aside class="sidebar">
         <h2>🎮 پنل مدیریت</h2>
+        {% if current_user.role == "admin" %}
         <a href="/admin/dashboard">📊 داشبورد</a>
+        {% endif %}
+        {% if current_user.role == "admin" %}
         <a href="/admin/users">👥 کاربران</a>
+        {% endif %}
         <a href="/admin/questions">📝 سوالات</a>
+        {% if current_user.role == "admin" %}
         <a href="/admin/attempts">📈 تلاش‌ها</a>
+        {% endif %}
         <hr style="border-color: #334155; margin: 20px 0;">
         <a href="/">🏠 صفحه اصلی</a>
         <a href="/logout">🚪 خروج</a>

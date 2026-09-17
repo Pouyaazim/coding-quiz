@@ -12,11 +12,14 @@ templates = Jinja2Templates(directory="templates")
 
 
 # ----------------------------
-# ریدایرکت ریشه ادمین
+# ورودی هوشمند پنل
 # ----------------------------
-@router.get("/")
-def admin_root(user: User = Depends(require_admin)):
-    return RedirectResponse(url="/admin/dashboard", status_code=303)
+@router.get("/panel")
+def admin_panel_entry(user: User = Depends(require_writer)):
+    """ادمین → داشبورد، writer → سوالات"""
+    if user.role == "admin":
+        return RedirectResponse(url="/admin/dashboard", status_code=303)
+    return RedirectResponse(url="/admin/questions", status_code=303)
 
 
 # ----------------------------
@@ -123,9 +126,154 @@ def delete_user(
     if target.id == user.id:
         raise HTTPException(status_code=400, detail="نمیتونی خودت رو حذف کنی")
 
-    # اول تلاش‌ها رو حذف کن (چون FK دارن)
     db.query(Attempt).filter(Attempt.user_id == user_id).delete()
     db.delete(target)
     db.commit()
 
     return RedirectResponse(url="/admin/users", status_code=303)
+
+
+# ----------------------------
+# مدیریت سوالات (admin + writer)
+# ----------------------------
+@router.get("/questions")
+def questions_list(
+    request: Request,
+    user: User = Depends(require_writer),
+    db: Session = Depends(get_db),
+):
+    questions = db.query(Question).order_by(Question.id.desc()).all()
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/questions.html",
+        context={
+            "current_user": user,
+            "questions": questions,
+        },
+    )
+
+
+@router.get("/questions/new")
+def question_new_page(
+    request: Request,
+    user: User = Depends(require_writer),
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/question_form.html",
+        context={
+            "current_user": user,
+            "question": None,
+        },
+    )
+
+
+@router.post("/questions/new")
+def question_create(
+    request: Request,
+    text: str = Form(...),
+    option_a: str = Form(...),
+    option_b: str = Form(...),
+    option_c: str = Form(...),
+    option_d: str = Form(...),
+    correct_option: str = Form(...),
+    category: str = Form("python"),
+    difficulty: str = Form("easy"),
+    xp_reward: int = Form(10),
+    user: User = Depends(require_writer),
+    db: Session = Depends(get_db),
+):
+    if correct_option not in ("a", "b", "c", "d"):
+        raise HTTPException(status_code=400, detail="گزینه درست باید a، b، c یا d باشه")
+
+    q = Question(
+        text=text,
+        option_a=option_a,
+        option_b=option_b,
+        option_c=option_c,
+        option_d=option_d,
+        correct_option=correct_option,
+        category=category,
+        difficulty=difficulty,
+        xp_reward=xp_reward,
+    )
+    db.add(q)
+    db.commit()
+
+    return RedirectResponse(url="/admin/questions", status_code=303)
+
+
+@router.get("/questions/{question_id}/edit")
+def question_edit_page(
+    question_id: int,
+    request: Request,
+    user: User = Depends(require_writer),
+    db: Session = Depends(get_db),
+):
+    question = db.query(Question).filter(Question.id == question_id).first()
+    if not question:
+        raise HTTPException(status_code=404, detail="سوال پیدا نشد")
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/question_form.html",
+        context={
+            "current_user": user,
+            "question": question,
+        },
+    )
+
+
+@router.post("/questions/{question_id}/edit")
+def question_update(
+    question_id: int,
+    request: Request,
+    text: str = Form(...),
+    option_a: str = Form(...),
+    option_b: str = Form(...),
+    option_c: str = Form(...),
+    option_d: str = Form(...),
+    correct_option: str = Form(...),
+    category: str = Form("python"),
+    difficulty: str = Form("easy"),
+    xp_reward: int = Form(10),
+    user: User = Depends(require_writer),
+    db: Session = Depends(get_db),
+):
+    question = db.query(Question).filter(Question.id == question_id).first()
+    if not question:
+        raise HTTPException(status_code=404, detail="سوال پیدا نشد")
+
+    if correct_option not in ("a", "b", "c", "d"):
+        raise HTTPException(status_code=400, detail="گزینه درست باید a، b، c یا d باشه")
+
+    question.text = text
+    question.option_a = option_a
+    question.option_b = option_b
+    question.option_c = option_c
+    question.option_d = option_d
+    question.correct_option = correct_option
+    question.category = category
+    question.difficulty = difficulty
+    question.xp_reward = xp_reward
+
+    db.commit()
+
+    return RedirectResponse(url="/admin/questions", status_code=303)
+
+
+@router.post("/questions/{question_id}/delete")
+def question_delete(
+    question_id: int,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    question = db.query(Question).filter(Question.id == question_id).first()
+    if not question:
+        raise HTTPException(status_code=404, detail="سوال پیدا نشد")
+
+    db.query(Attempt).filter(Attempt.question_id == question_id).delete()
+    db.delete(question)
+    db.commit()
+
+    return RedirectResponse(url="/admin/questions", status_code=303)

@@ -64,8 +64,8 @@
             <p>خوش اومدی، <strong>{{ user.username }}</strong>! 🎉</p>
             <p>امتیاز: {{ user.xp }} | سطح: {{ user.level }}</p>
             <a href="/quiz">شروع کوییز 🎮</a>
-            {% if user.role == "admin" %}
-                <a href="/admin/dashboard" class="purple">پنل مدیریت 🛠</a>
+            {% if user.role in ("admin", "writer") %}
+                <a href="/admin/panel" class="purple">پنل مدیریت 🛠</a>
             {% endif %}
             <a href="/logout" class="gray">خروج</a>
         {% else %}
