@@ -11,7 +11,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
         }
         .card {
@@ -42,13 +42,27 @@
         a:hover {
             background: #2563eb;
         }
+        .gray {
+            background: #475569;
+        }
+        .gray:hover {
+            background: #334155;
+        }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>🎮 Coding Quiz</h1>
-        <p>به بازی-آموزش برنامه‌نویسی خوش اومدی!</p>
-        <a href="/docs">مشاهده API</a>
+
+        {% if user %}
+            <p>خوش اومدی، <strong>{{ user.username }}</strong>! 🎉</p>
+            <p>امتیاز: {{ user.xp }} | سطح: {{ user.level }}</p>
+            <a href="/logout" class="gray">خروج</a>
+        {% else %}
+            <p>به بازی-آموزش برنامه‌نویسی خوش اومدی!</p>
+            <a href="/register">ثبت‌نام</a>
+            <a href="/login" class="gray">ورود</a>
+        {% endif %}
     </div>
 </body>
 </html>
