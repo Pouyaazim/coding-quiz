@@ -1,0 +1,172 @@
+{% extends "admin/base.html" %}
+
+{% block title %}کاربران - پنل مدیریت{% endblock %}
+{% block page_title %}👥 مدیریت کاربران{% endblock %}
+
+{% block content %}
+<style>
+    .toolbar {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        align-items: center;
+    }
+    .search-box {
+        flex: 1;
+        padding: 12px 18px;
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 10px;
+        color: white;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+    .search-box:focus {
+        outline: none;
+        border-color: #3b82f6;
+    }
+    .btn {
+        padding: 12px 20px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-family: inherit;
+        text-decoration: none;
+        color: white;
+    }
+    .btn-primary { background: #3b82f6; }
+    .btn-primary:hover { background: #2563eb; }
+    .section {
+        background: #1e293b;
+        padding: 10px 25px;
+        border-radius: 15px;
+        overflow-x: auto;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 15px 12px;
+        text-align: right;
+        border-bottom: 1px solid #334155;
+    }
+    th {
+        color: #94a3b8;
+        font-weight: normal;
+        font-size: 0.9rem;
+    }
+    tr:last-child td { border-bottom: none; }
+    .role-select {
+        padding: 6px 10px;
+        background: #0f172a;
+        color: white;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        font-family: inherit;
+        cursor: pointer;
+    }
+    .role-badge {
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+    .role-standard { background: #334155; }
+    .role-writer { background: #0284c7; }
+    .role-admin { background: #7c3aed; }
+    .action-btns {
+        display: flex;
+        gap: 8px;
+    }
+    .btn-sm {
+        padding: 6px 14px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        color: white;
+    }
+    .btn-danger { background: #dc2626; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-save { background: #16a34a; }
+    .btn-save:hover { background: #15803d; }
+    .empty {
+        text-align: center;
+        padding: 40px;
+        color: #94a3b8;
+    }
+</style>
+
+<form method="GET" action="/admin/users" class="toolbar">
+    <input
+        type="text"
+        name="q"
+        class="search-box"
+        placeholder="جستجو در نام کاربری یا ایمیل..."
+        value="{{ q }}"
+    >
+    <button type="submit" class="btn btn-primary">جستجو</button>
+    {% if q %}
+    <a href="/admin/users" class="btn" style="background: #475569;">پاک کردن</a>
+    {% endif %}
+</form>
+
+<div class="section">
+    {% if users %}
+    <table>
+        <tr>
+            <th>#</th>
+            <th>نام کاربری</th>
+            <th>ایمیل</th>
+            <th>نقش</th>
+            <th>XP</th>
+            <th>سطح</th>
+            <th>عملیات</th>
+        </tr>
+        {% for u in users %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>
+                <span class="role-badge role-{{ u.role }}">{{ u.role }}</span>
+            </td>
+            <td>{{ u.xp }}</td>
+            <td>{{ u.level }}</td>
+            <td>
+                {% if u.id != current_user.id %}
+                <div class="action-btns">
+                    <form method="POST" action="/admin/users/{{ u.id }}/role" style="display: flex; gap: 5px;">
+                        <select name="role" class="role-select">
+                            <option value="standard" {% if u.role == "standard" %}selected{% endif %}>standard</option>
+                            <option value="writer" {% if u.role == "writer" %}selected{% endif %}>writer</option>
+                            <option value="admin" {% if u.role == "admin" %}selected{% endif %}>admin</option>
+                        </select>
+                        <button type="submit" class="btn-sm btn-save">ذخیره</button>
+                    </form>
+                    <form method="POST" action="/admin/users/{{ u.id }}/delete"
+                          onsubmit="return confirm('مطمئنی میخوای {{ u.username }} رو حذف کنی؟');">
+                        <button type="submit" class="btn-sm btn-danger">حذف</button>
+                    </form>
+                </div>
+                {% else %}
+                <span style="color: #64748b; font-size: 0.85rem;">(خودت)</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <div class="empty">
+        {% if q %}
+            کاربری با «{{ q }}» پیدا نشد
+        {% else %}
+            هنوز هیچ کاربری ثبت‌نام نکرده
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

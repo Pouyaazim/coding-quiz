@@ -1,21 +1,15 @@
-import sys
-import os
-
-# اضافه کردن پوشه اصلی به مسیر پایتون
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from database import SessionLocal
 from models import User
 
 db = SessionLocal()
-username = input("اسم کاربری که میخوای ادمین کنی: ")
+username = input("username that you want as admin=>  ")
 
 user = db.query(User).filter(User.username == username).first()
 if not user:
-    print("❌ User not found")
+    print("❌ user not found")
 else:
     user.role = "admin"
     db.commit()
-    print(f"✅ {username} is admin now")
+    print(f"✅ {username} admin now")
 
 db.close()

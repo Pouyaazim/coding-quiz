@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, HTTPException, Form
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
@@ -10,6 +11,17 @@ router = APIRouter(prefix="/admin")
 templates = Jinja2Templates(directory="templates")
 
 
+# ----------------------------
+# ریدایرکت ریشه ادمین
+# ----------------------------
+@router.get("/")
+def admin_root(user: User = Depends(require_admin)):
+    return RedirectResponse(url="/admin/dashboard", status_code=303)
+
+
+# ----------------------------
+# داشبورد
+# ----------------------------
 @router.get("/dashboard")
 def dashboard(
     request: Request,
@@ -41,7 +53,79 @@ def dashboard(
     )
 
 
-@router.get("/")
-def admin_root(user: User = Depends(require_admin)):
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/admin/dashboard", status_code=303)
+# ----------------------------
+# لیست کاربران + جستجو
+# ----------------------------
+@router.get("/users")
+def users_list(
+    request: Request,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+    q: str = "",
+):
+    query = db.query(User)
+    if q:
+        query = query.filter(
+            (User.username.contains(q)) | (User.email.contains(q))
+        )
+    users = query.order_by(User.created_at.desc()).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/users.html",
+        context={
+            "current_user": user,
+            "users": users,
+            "q": q,
+        },
+    )
+
+
+# ----------------------------
+# تغییر نقش کاربر
+# ----------------------------
+@router.post("/users/{user_id}/role")
+def change_role(
+    user_id: int,
+    role: str = Form(...),
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="کاربر پیدا نشد")
+
+    if target.id == user.id:
+        raise HTTPException(status_code=400, detail="نمیتونی نقش خودت رو عوض کنی")
+
+    if role not in ("standard", "writer", "admin"):
+        raise HTTPException(status_code=400, detail="نقش نامعتبر")
+
+    target.role = role
+    db.commit()
+
+    return RedirectResponse(url="/admin/users", status_code=303)
+
+
+# ----------------------------
+# حذف کاربر
+# ----------------------------
+@router.post("/users/{user_id}/delete")
+def delete_user(
+    user_id: int,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="کاربر پیدا نشد")
+
+    if target.id == user.id:
+        raise HTTPException(status_code=400, detail="نمیتونی خودت رو حذف کنی")
+
+    # اول تلاش‌ها رو حذف کن (چون FK دارن)
+    db.query(Attempt).filter(Attempt.user_id == user_id).delete()
+    db.delete(target)
+    db.commit()
+
+    return RedirectResponse(url="/admin/users", status_code=303)
