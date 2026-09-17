@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}پنل ادمین{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Tahoma, sans-serif;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 240px;
+            background: #1e293b;
+            padding: 30px 20px;
+        }
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #60a5fa;
+        }
+        .sidebar a {
+            display: block;
+            padding: 12px 15px;
+            color: #cbd5e1;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+        .sidebar a:hover {
+            background: #334155;
+            color: white;
+        }
+        .sidebar a.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .content {
+            flex: 1;
+            padding: 40px;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .topbar h1 {
+            margin: 0;
+        }
+        .badge {
+            background: #3b82f6;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        .back-link {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover { color: white; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>🎮 پنل مدیریت</h2>
+        <a href="/admin/dashboard">📊 داشبورد</a>
+        <a href="/admin/users">👥 کاربران</a>
+        <a href="/admin/questions">📝 سوالات</a>
+        <a href="/admin/attempts">📈 تلاش‌ها</a>
+        <hr style="border-color: #334155; margin: 20px 0;">
+        <a href="/">🏠 صفحه اصلی</a>
+        <a href="/logout">🚪 خروج</a>
+    </aside>
+
+    <main class="content">
+        <div class="topbar">
+            <h1>{% block page_title %}داشبورد{% endblock %}</h1>
+            <span class="badge">نقش: {{ current_user.role }}</span>
+        </div>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

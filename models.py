@@ -13,6 +13,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     xp = Column(Integer, default=0)
     level = Column(Integer, default=0)
+    role = Column(String, default="standard")
     created_at = Column(DateTime, default=datetime.utcnow)
 
     attempts = relationship("Attempt", back_populates="user")
@@ -22,15 +23,15 @@ class Question(Base):
     __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True, index=True)
-    text = Column(String, nullable=False)          # متن سوال
-    option_a = Column(String, nullable=False)      # گزینه ۱
-    option_b = Column(String, nullable=False)      # گزینه ۲
-    option_c = Column(String, nullable=False)      # گزینه ۳
-    option_d = Column(String, nullable=False)      # گزینه ۴
-    correct_option = Column(String, nullable=False)  # "a" یا "b" یا "c" یا "d"
-    category = Column(String, default="python")    # دسته‌بندی: python, js, ...
-    difficulty = Column(String, default="easy")    # سطح: easy, medium, hard
-    xp_reward = Column(Integer, default=10)        # امتیاز این سوال
+    text = Column(String, nullable=False)
+    option_a = Column(String, nullable=False)
+    option_b = Column(String, nullable=False)
+    option_c = Column(String, nullable=False)
+    option_d = Column(String, nullable=False)
+    correct_option = Column(String, nullable=False)
+    category = Column(String, default="python")
+    difficulty = Column(String, default="easy")
+    xp_reward = Column(Integer, default=10)
 
 
 class Attempt(Base):
@@ -39,8 +40,8 @@ class Attempt(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
-    selected_option = Column(String, nullable=False)  # گزینه‌ای که کاربر انتخاب کرد
-    is_correct = Column(Boolean, default=False)       # درست بود یا نه
+    selected_option = Column(String, nullable=False)
+    is_correct = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="attempts")
