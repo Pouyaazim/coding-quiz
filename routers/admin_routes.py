@@ -4,10 +4,11 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, Integer
 from sqlalchemy.orm import Session
-
 from database import get_db
 from models import User, Question, Attempt
 from dependencies import require_admin, require_writer
+from leveling import level_progress
+from models import Question
 
 router = APIRouter(prefix="/admin")
 templates = Jinja2Templates(directory="templates")
@@ -391,5 +392,71 @@ def attempts_list(
             "difficulty_data": difficulty_data,
             "category_labels": category_labels,
             "category_data": category_data,
+        },
+    )
+# ----------------------------
+# مشاهده پروفایل کاربر (فقط ادمین)
+# ----------------------------
+@router.get("/users/{user_id}")
+def admin_view_user(
+    user_id: int,
+    request: Request,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="کاربر پیدا نشد")
+
+    # آمار
+    total_attempts = db.query(Attempt).filter(Attempt.user_id == target.id).count()
+    correct_attempts = db.query(Attempt).filter(
+        Attempt.user_id == target.id,
+        Attempt.is_correct == True,
+    ).count()
+    wrong_attempts = total_attempts - correct_attempts
+    accuracy = round((correct_attempts / total_attempts) * 100, 1) if total_attempts > 0 else 0
+
+    higher_count = db.query(User).filter(User.xp > target.xp).count()
+    rank = higher_count + 1
+    total_users = db.query(User).count()
+
+    progress = level_progress(target.xp)
+
+    recent_attempts = (
+        db.query(Attempt)
+        .filter(Attempt.user_id == target.id)
+        .order_by(Attempt.created_at.desc())
+        .limit(10)
+        .all()
+    )
+
+    best_category = (
+        db.query(
+            Question.category,
+            func.count(Attempt.id).label("count"),
+        )
+        .join(Attempt)
+        .filter(Attempt.user_id == target.id, Attempt.is_correct == True)
+        .group_by(Question.category)
+        .order_by(func.count(Attempt.id).desc())
+        .first()
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/user_detail.html",
+        context={
+            "current_user": user,
+            "target": target,
+            "progress": progress,
+            "total_attempts": total_attempts,
+            "correct_attempts": correct_attempts,
+            "wrong_attempts": wrong_attempts,
+            "accuracy": accuracy,
+            "rank": rank,
+            "total_users": total_users,
+            "recent_attempts": recent_attempts,
+            "best_category": best_category.category if best_category else None,
         },
     )

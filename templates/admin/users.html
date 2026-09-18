@@ -88,7 +88,11 @@
         cursor: pointer;
         font-family: inherit;
         color: white;
+        text-decoration: none;
+        display: inline-block;
     }
+    .btn-view { background: #0ea5e9; }
+    .btn-view:hover { background: #0284c7; }
     .btn-danger { background: #dc2626; }
     .btn-danger:hover { background: #b91c1c; }
     .btn-save { background: #16a34a; }
@@ -139,6 +143,7 @@
             <td>
                 {% if u.id != current_user.id %}
                 <div class="action-btns">
+                    <a href="/admin/users/{{ u.id }}" class="btn-sm btn-view">مشاهده</a>
                     <form method="POST" action="/admin/users/{{ u.id }}/role" style="display: flex; gap: 5px;">
                         <select name="role" class="role-select">
                             <option value="standard" {% if u.role == "standard" %}selected{% endif %}>standard</option>
