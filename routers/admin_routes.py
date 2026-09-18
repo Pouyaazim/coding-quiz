@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Request, Depends, HTTPException, Form
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import func, Integer
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -57,7 +59,7 @@ def dashboard(
 
 
 # ----------------------------
-# لیست کاربران + جستجو
+# لیست کاربران
 # ----------------------------
 @router.get("/users")
 def users_list(
@@ -84,9 +86,6 @@ def users_list(
     )
 
 
-# ----------------------------
-# تغییر نقش کاربر
-# ----------------------------
 @router.post("/users/{user_id}/role")
 def change_role(
     user_id: int,
@@ -110,9 +109,6 @@ def change_role(
     return RedirectResponse(url="/admin/users", status_code=303)
 
 
-# ----------------------------
-# حذف کاربر
-# ----------------------------
 @router.post("/users/{user_id}/delete")
 def delete_user(
     user_id: int,
@@ -134,7 +130,7 @@ def delete_user(
 
 
 # ----------------------------
-# مدیریت سوالات (admin + writer)
+# مدیریت سوالات
 # ----------------------------
 @router.get("/questions")
 def questions_list(
@@ -277,3 +273,123 @@ def question_delete(
     db.commit()
 
     return RedirectResponse(url="/admin/questions", status_code=303)
+
+
+# ----------------------------
+# لاگ تلاش‌ها
+# ----------------------------
+@router.get("/attempts")
+def attempts_list(
+    request: Request,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+    filter_type: str = "all",
+    period: int = 7,
+):
+    if period not in (7, 14, 30, 90):
+        period = 7
+
+    query = db.query(Attempt).join(User).join(Question)
+
+    if filter_type == "correct":
+        query = query.filter(Attempt.is_correct == True)
+    elif filter_type == "wrong":
+        query = query.filter(Attempt.is_correct == False)
+
+    attempts = query.order_by(Attempt.created_at.desc()).limit(100).all()
+
+    total = db.query(Attempt).count()
+    correct_count = db.query(Attempt).filter(Attempt.is_correct == True).count()
+    wrong_count = total - correct_count
+    accuracy = round((correct_count / total) * 100, 1) if total > 0 else 0
+
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_count = db.query(Attempt).filter(Attempt.created_at >= today_start).count()
+
+    period_start = datetime.utcnow() - timedelta(days=period)
+    daily_stats = (
+        db.query(
+            func.date(Attempt.created_at).label("day"),
+            func.count(Attempt.id).label("total"),
+            func.sum(func.cast(Attempt.is_correct, Integer)).label("correct"),
+        )
+        .filter(Attempt.created_at >= period_start)
+        .group_by(func.date(Attempt.created_at))
+        .order_by(func.date(Attempt.created_at))
+        .all()
+    )
+
+    days = []
+    daily_total = []
+    daily_correct = []
+
+    for i in range(period):
+        day = (datetime.utcnow() - timedelta(days=period - 1 - i)).date()
+        days.append(day.strftime("%m/%d"))
+
+        found = None
+        for stat in daily_stats:
+            if str(stat.day) == str(day):
+                found = stat
+                break
+
+        if found:
+            daily_total.append(found.total)
+            daily_correct.append(found.correct or 0)
+        else:
+            daily_total.append(0)
+            daily_correct.append(0)
+
+    difficulty_stats = (
+        db.query(
+            Question.difficulty,
+            func.count(Attempt.id).label("count"),
+        )
+        .join(Attempt)
+        .group_by(Question.difficulty)
+        .all()
+    )
+    difficulty_labels = [d.difficulty for d in difficulty_stats]
+    difficulty_data = [d.count for d in difficulty_stats]
+
+    category_stats = (
+        db.query(
+            Question.category,
+            func.count(Attempt.id).label("count"),
+        )
+        .join(Attempt)
+        .group_by(Question.category)
+        .all()
+    )
+    category_labels = [c.category for c in category_stats]
+    category_data = [c.count for c in category_stats]
+
+    active_users_today = (
+        db.query(func.count(func.distinct(Attempt.user_id)))
+        .filter(Attempt.created_at >= today_start)
+        .scalar()
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/attempts.html",
+        context={
+            "current_user": user,
+            "attempts": attempts,
+            "filter_type": filter_type,
+            "period": period,
+            "total": total,
+            "correct_count": correct_count,
+            "wrong_count": wrong_count,
+            "accuracy": accuracy,
+            "today_count": today_count,
+            "active_users_today": active_users_today,
+            "days": days,
+            "daily_total": daily_total,
+            "daily_correct": daily_correct,
+            "difficulty_labels": difficulty_labels,
+            "difficulty_data": difficulty_data,
+            "category_labels": category_labels,
+            "category_data": category_data,
+        },
+    )
