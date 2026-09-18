@@ -4,3 +4,5 @@ __pycache__/
 .env
 *.db
 quiz.db
+static/avatars/*
+!static/avatars/.gitkeep

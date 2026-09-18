@@ -14,6 +14,7 @@ class User(Base):
     xp = Column(Integer, default=0)
     level = Column(Integer, default=0)
     role = Column(String, default="standard")
+    avatar = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     attempts = relationship("Attempt", back_populates="user")

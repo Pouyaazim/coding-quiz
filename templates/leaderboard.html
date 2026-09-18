@@ -138,6 +138,26 @@
             font-size: 0.75rem;
             margin-right: 8px;
         }
+        /* Avatar styles */
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            flex-shrink: 0;
+            overflow: hidden;
+            border: 2px solid #334155;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -176,6 +196,15 @@
                         {% elif item.rank == 3 %}🥉
                         {% else %}{{ item.rank }}{% endif %}
                     </div>
+
+                    <div class="avatar">
+                        {% if item.user.avatar %}
+                            <img src="/static/avatars/{{ item.user.avatar }}" alt="avatar">
+                        {% else %}
+                            {{ item.user.username[0] | upper }}
+                        {% endif %}
+                    </div>
+
                     <div class="user-info">
                         <div class="username">
                             {{ item.user.username }}
