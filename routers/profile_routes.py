@@ -187,3 +187,81 @@ def profile_edit(
             "success": "پروفایل با موفقیت ذخیره شد ✅",
         },
     )
+
+@router.get("/u/{username}")
+def public_profile(
+    username: str,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    # چک لاگین
+    current_user_id = request.session.get("user_id")
+    if not current_user_id:
+        return RedirectResponse(url="/login", status_code=303)
+
+    # کاربر مورد نظر
+    target = db.query(User).filter(User.username == username).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="کاربر پیدا نشد")
+
+    # اگه کاربر خودش بود، برو به پروفایل شخصی
+    current_user = db.query(User).filter(User.id == current_user_id).first()
+    if current_user and current_user.id == target.id:
+        return RedirectResponse(url="/profile", status_code=303)
+
+    # آمار
+    total_attempts = db.query(Attempt).filter(Attempt.user_id == target.id).count()
+    correct_attempts = db.query(Attempt).filter(
+        Attempt.user_id == target.id,
+        Attempt.is_correct == True,
+    ).count()
+    wrong_attempts = total_attempts - correct_attempts
+    accuracy = round((correct_attempts / total_attempts) * 100, 1) if total_attempts > 0 else 0
+
+    # رتبه
+    higher_count = db.query(User).filter(User.xp > target.xp).count()
+    rank = higher_count + 1
+    total_users = db.query(User).count()
+
+    # لول
+    progress = level_progress(target.xp)
+
+    # بهترین دسته‌بندی
+    best_category = (
+        db.query(
+            Question.category,
+            func.count(Attempt.id).label("count"),
+        )
+        .join(Attempt)
+        .filter(Attempt.user_id == target.id, Attempt.is_correct == True)
+        .group_by(Question.category)
+        .order_by(func.count(Attempt.id).desc())
+        .first()
+    )
+
+    # ۵ تلاش آخر (فقط سوال و درست/غلط، بدون جزئیات)
+    recent_attempts = (
+        db.query(Attempt)
+        .filter(Attempt.user_id == target.id)
+        .order_by(Attempt.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="public_profile.html",
+        context={
+            "user": current_user,
+            "target": target,
+            "progress": progress,
+            "total_attempts": total_attempts,
+            "correct_attempts": correct_attempts,
+            "wrong_attempts": wrong_attempts,
+            "accuracy": accuracy,
+            "rank": rank,
+            "total_users": total_users,
+            "recent_attempts": recent_attempts,
+            "best_category": best_category.category if best_category else None,
+        },
+    )

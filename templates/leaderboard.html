@@ -207,9 +207,13 @@
 
                     <div class="user-info">
                         <div class="username">
-                            {{ item.user.username }}
                             {% if current_user and item.user.id == current_user.id %}
+                                {{ item.user.username }}
                                 <span class="me-tag">تو</span>
+                            {% else %}
+                                <a href="/u/{{ item.user.username }}" style="color: inherit; text-decoration: none;">
+                                    {{ item.user.username }}
+                                </a>
                             {% endif %}
                         </div>
                         <div class="level">سطح {{ item.user.level }}</div>
