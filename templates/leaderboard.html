@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لیست بهترین‌ها</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 40px;
+        }
+        .my-rank {
+            background: linear-gradient(135deg, #7c3aed, #3b82f6);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .my-rank .label {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        .my-rank .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .board {
+            background: #1e293b;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .row {
+            display: flex;
+            align-items: center;
+            padding: 18px 25px;
+            border-bottom: 1px solid #334155;
+            gap: 15px;
+        }
+        .row:last-child {
+            border-bottom: none;
+        }
+        .row.me {
+            background: #1e3a8a33;
+            border-right: 4px solid #3b82f6;
+        }
+        .rank {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #0f172a;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .rank-1 {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            font-size: 1.2rem;
+        }
+        .rank-2 {
+            background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+            color: #000;
+            font-size: 1.1rem;
+        }
+        .rank-3 {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            color: white;
+            font-size: 1.1rem;
+        }
+        .user-info {
+            flex: 1;
+        }
+        .username {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        .level {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        .xp {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4ade80;
+        }
+        .xp-label {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            text-align: left;
+        }
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .back a {
+            color: #60a5fa;
+            text-decoration: none;
+            padding: 12px 30px;
+            background: #1e293b;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .back a:hover {
+            background: #334155;
+        }
+        .me-tag {
+            background: #3b82f6;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 لیست بهترین‌ها</h1>
+        <p class="subtitle">۲۰ نفر برتر بر اساس امتیاز</p>
+
+        {% if current_user %}
+        <div class="my-rank">
+            <div>
+                <div class="label">رتبه تو</div>
+                <div class="value">
+                    {% if current_user_rank == 1 %}🥇
+                    {% elif current_user_rank == 2 %}🥈
+                    {% elif current_user_rank == 3 %}🥉
+                    {% else %}#{% endif %}{{ current_user_rank }}
+                </div>
+            </div>
+            <div style="text-align: left;">
+                <div class="label">امتیاز تو</div>
+                <div class="value">{{ current_user.xp }} XP</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="board">
+            {% if ranked_users %}
+                {% for item in ranked_users %}
+                <div class="row {% if current_user and item.user.id == current_user.id %}me{% endif %}">
+                    <div class="rank
+                        {% if item.rank == 1 %}rank-1
+                        {% elif item.rank == 2 %}rank-2
+                        {% elif item.rank == 3 %}rank-3{% endif %}">
+                        {% if item.rank == 1 %}🥇
+                        {% elif item.rank == 2 %}🥈
+                        {% elif item.rank == 3 %}🥉
+                        {% else %}{{ item.rank }}{% endif %}
+                    </div>
+                    <div class="user-info">
+                        <div class="username">
+                            {{ item.user.username }}
+                            {% if current_user and item.user.id == current_user.id %}
+                                <span class="me-tag">تو</span>
+                            {% endif %}
+                        </div>
+                        <div class="level">سطح {{ item.user.level }}</div>
+                    </div>
+                    <div style="text-align: left;">
+                        <div class="xp">{{ item.user.xp }}</div>
+                        <div class="xp-label">XP</div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty">
+                    هنوز کسی امتیاز نگرفته. تو اولین باش! 🎮
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="back">
+            <a href="/">🏠 بازگشت به صفحه اصلی</a>
+        </div>
+    </div>
+</body>
+</html>

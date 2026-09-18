@@ -64,6 +64,7 @@
             <p>خوش اومدی، <strong>{{ user.username }}</strong>! 🎉</p>
             <p>امتیاز: {{ user.xp }} | سطح: {{ user.level }}</p>
             <a href="/quiz">شروع کوییز 🎮</a>
+            <a href="/leaderboard" style="background: #16a34a;">🏆 لیست بهترین‌ها</a>
             {% if user.role in ("admin", "writer") %}
                 <a href="/admin/panel" class="purple">پنل مدیریت 🛠</a>
             {% endif %}

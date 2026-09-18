@@ -98,3 +98,39 @@ def submit_answer(
             "correct_answer": correct_answer_text,
         },
     )
+
+@router.get("/leaderboard")
+def leaderboard(request: Request, db: Session = Depends(get_db)):
+    top_users = (
+        db.query(User)
+        .order_by(User.xp.desc())
+        .limit(20)
+        .all()
+    )
+
+    current_user_id = request.session.get("user_id")
+
+    # رتبه‌ی کاربر فعلی (اگه تو ۲۰ تای اول نبود)
+    current_user_rank = None
+    current_user = None
+    if current_user_id:
+        current_user = db.query(User).filter(User.id == current_user_id).first()
+        if current_user:
+            # تعداد کاربرایی که XP بیشتری دارن
+            higher_count = db.query(User).filter(User.xp > current_user.xp).count()
+            current_user_rank = higher_count + 1
+
+    # رتبه‌ی هر کاربر تو ۲۰ تای اول
+    ranked_users = []
+    for i, u in enumerate(top_users, start=1):
+        ranked_users.append({"rank": i, "user": u})
+
+    return templates.TemplateResponse(
+        request=request,
+        name="leaderboard.html",
+        context={
+            "ranked_users": ranked_users,
+            "current_user": current_user,
+            "current_user_rank": current_user_rank,
+        },
+    )
