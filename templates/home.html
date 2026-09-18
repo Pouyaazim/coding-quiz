@@ -13,13 +13,16 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
         .card {
             background: #1e293b;
-            padding: 40px 60px;
+            padding: 40px 50px;
             border-radius: 20px;
             text-align: center;
             box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 100%;
         }
         h1 {
             font-size: 2.5rem;
@@ -27,11 +30,11 @@
         }
         p {
             color: #94a3b8;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
         a {
             display: inline-block;
-            margin-top: 20px;
+            margin-top: 15px;
             padding: 12px 30px;
             background: #3b82f6;
             color: white;
@@ -42,17 +45,62 @@
         a:hover {
             background: #2563eb;
         }
-        .gray {
-            background: #475569;
+        .gray { background: #475569; }
+        .gray:hover { background: #334155; }
+        .green { background: #16a34a; }
+        .green:hover { background: #15803d; }
+        .purple { background: #7c3aed; }
+        .purple:hover { background: #6d28d9; }
+
+        /* Level box */
+        .level-box {
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 1px solid #334155;
         }
-        .gray:hover {
-            background: #334155;
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
         }
-        .purple {
-            background: #7c3aed;
+        .level-badge {
+            background: linear-gradient(135deg, #7c3aed, #3b82f6);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1rem;
         }
-        .purple:hover {
-            background: #6d28d9;
+        .xp-text {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        .xp-text strong {
+            color: #60a5fa;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #7c3aed);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #64748b;
         }
     </style>
 </head>
@@ -61,10 +109,24 @@
         <h1>🎮 Coding Quiz</h1>
 
         {% if user %}
-            <p>خوش اومدی، <strong>{{ user.username }}</strong>! 🎉</p>
-            <p>امتیاز: {{ user.xp }} | سطح: {{ user.level }}</p>
+            <p>خوش اومدی، <strong style="color: white;">{{ user.username }}</strong>! 🎉</p>
+
+            <div class="level-box">
+                <div class="level-header">
+                    <span class="level-badge">سطح {{ progress.level }}</span>
+                    <span class="xp-text"><strong>{{ user.xp }}</strong> XP</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ progress.progress }}%;"></div>
+                </div>
+                <div class="progress-label">
+                    <span>{{ progress.xp_in_level }} / {{ progress.xp_needed }}</span>
+                    <span>{{ progress.progress }}٪ تا سطح {{ progress.level + 1 }}</span>
+                </div>
+            </div>
+
             <a href="/quiz">شروع کوییز 🎮</a>
-            <a href="/leaderboard" style="background: #16a34a;">🏆 لیست بهترین‌ها</a>
+            <a href="/leaderboard" class="green">🏆 لیست بهترین‌ها</a>
             {% if user.role in ("admin", "writer") %}
                 <a href="/admin/panel" class="purple">پنل مدیریت 🛠</a>
             {% endif %}
