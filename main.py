@@ -5,6 +5,7 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from sqlalchemy import text, inspect
 from sqlalchemy.orm import Session
 
 from database import get_db, Base, engine, SessionLocal
@@ -13,13 +14,44 @@ from leveling import level_progress
 from routers import auth_routes, quiz_routes, admin_routes, profile_routes
 
 
+def run_migrations():
+    """اضافه کردن ستون‌های جدید به جداول موجود"""
+    inspector = inspect(engine)
+    if "users" not in inspector.get_table_names():
+        return  # جدول هنوز ساخته نشده
+
+    existing_columns = {col["name"] for col in inspector.get_columns("users")}
+
+    migrations = [
+        ("avatar_data", "ALTER TABLE users ADD COLUMN avatar_data TEXT"),
+    ]
+
+    with engine.connect() as conn:
+        for column_name, sql in migrations:
+            if column_name not in existing_columns:
+                try:
+                    conn.execute(text(sql))
+                    conn.commit()
+                    print(f"Migration: added column '{column_name}' to users")
+                except Exception as e:
+                    print(f"Migration failed for '{column_name}': {e}")
+                    conn.rollback()
+
+
 def init_database():
     """ساخت جدول‌ها و اضافه کردن سوالات پیش‌فرض اگه دیتابیس خالیه"""
     from add_questions import questions as seed_questions
 
     Path("static/avatars").mkdir(parents=True, exist_ok=True)
-    Base.metadata.create_all(bind=engine)
 
+    # ساخت جدول‌ها
+    Base.metadata.create_all(bind=engine)
+    print("Tables created/verified.")
+
+    # اجرای مهاجرت‌ها
+    run_migrations()
+
+    # پر کردن سوالات
     db = SessionLocal()
     try:
         count = db.query(Question).count()
