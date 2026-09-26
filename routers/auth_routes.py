@@ -37,10 +37,15 @@ def register_user(
             context={"error": "این نام کاربری یا ایمیل قبلاً استفاده شده"},
         )
 
+    # اگه هیچ کاربری نیست، اولین کاربر ادمین بشه
+    user_count = db.query(User).count()
+    role = "admin" if user_count == 0 else "standard"
+
     new_user = User(
         username=username,
         email=email,
         hashed_password=hash_password(password),
+        role=role,
     )
     db.add(new_user)
     db.commit()

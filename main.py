@@ -17,13 +17,9 @@ def init_database():
     """ساخت جدول‌ها و اضافه کردن سوالات پیش‌فرض اگه دیتابیس خالیه"""
     from add_questions import questions as seed_questions
 
-    # ساخت پوشه avatars
     Path("static/avatars").mkdir(parents=True, exist_ok=True)
-
-    # ساخت جدول‌ها
     Base.metadata.create_all(bind=engine)
 
-    # چک کن اگه هیچ سوالی نیست، از seed اضافه کن
     db = SessionLocal()
     try:
         count = db.query(Question).count()
@@ -41,18 +37,15 @@ def init_database():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # این کد موقع بالا اومدن سرور اجرا میشه
     print("Starting up...")
     init_database()
     print("Startup complete!")
     yield
-    # این کد موقع خاموش شدن اجرا میشه
     print("Shutting down...")
 
 
 app = FastAPI(lifespan=lifespan)
 
-# mount static
 Path("static").mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
