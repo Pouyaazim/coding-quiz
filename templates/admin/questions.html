@@ -1,134 +1,68 @@
 {% extends "admin/base.html" %}
 
-{% block title %}سوالات - پنل مدیریت{% endblock %}
+{% block title %}سوالات — پنل مدیریت{% endblock %}
 {% block page_title %}📝 مدیریت سوالات{% endblock %}
 
 {% block content %}
-<style>
-    .toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-    }
-    .btn {
-        padding: 12px 22px;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        font-size: 0.95rem;
-        font-family: inherit;
-        text-decoration: none;
-        color: white;
-        display: inline-block;
-    }
-    .btn-primary { background: #3b82f6; }
-    .btn-primary:hover { background: #2563eb; }
-    .btn-success { background: #16a34a; }
-    .btn-success:hover { background: #15803d; }
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 0.85rem;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        font-family: inherit;
-        color: white;
-        text-decoration: none;
-        display: inline-block;
-    }
-    .btn-warning { background: #f59e0b; }
-    .btn-warning:hover { background: #d97706; }
-    .btn-danger { background: #dc2626; }
-    .btn-danger:hover { background: #b91c1c; }
-    .section {
-        background: #1e293b;
-        padding: 10px 25px;
-        border-radius: 15px;
-        overflow-x: auto;
-    }
-    table { width: 100%; border-collapse: collapse; }
-    th, td {
-        padding: 15px 12px;
-        text-align: right;
-        border-bottom: 1px solid #334155;
-    }
-    th {
-        color: #94a3b8;
-        font-weight: normal;
-        font-size: 0.9rem;
-    }
-    tr:last-child td { border-bottom: none; }
-    .question-text {
-        max-width: 350px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .tag {
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        display: inline-block;
-    }
-    .tag-easy { background: #166534; }
-    .tag-medium { background: #a16207; }
-    .tag-hard { background: #991b1b; }
-    .tag-cat { background: #334155; }
-    .actions {
-        display: flex;
-        gap: 6px;
-    }
-    .empty {
-        text-align: center;
-        padding: 40px;
-        color: #94a3b8;
-    }
-</style>
 
-<div class="toolbar">
-    <span style="color: #94a3b8;">{{ questions|length }} سوال</span>
-    <a href="/admin/questions/new" class="btn btn-success">+ سوال جدید</a>
+<div class="flex justify-between items-center mb-3" style="flex-wrap: wrap; gap: 12px; animation: fadeInUp 0.5s ease-out;">
+    <span class="badge badge-primary">{{ questions|length }} سوال</span>
+    <a href="/admin/questions/new" class="btn btn-success btn-shine">+ سوال جدید</a>
 </div>
 
-<div class="section">
+<div class="admin-table-wrap" style="animation: fadeInUp 0.6s ease-out 0.1s both;">
     {% if questions %}
-    <table>
-        <tr>
-            <th>#</th>
-            <th>سوال</th>
-            <th>دسته</th>
-            <th>سطح</th>
-            <th>XP</th>
-            <th>جواب</th>
-            <th>عملیات</th>
-        </tr>
-        {% for q in questions %}
-        <tr>
-            <td>{{ q.id }}</td>
-            <td class="question-text" title="{{ q.text }}">{{ q.text }}</td>
-            <td><span class="tag tag-cat">{{ q.category }}</span></td>
-            <td><span class="tag tag-{{ q.difficulty }}">{{ q.difficulty }}</span></td>
-            <td>{{ q.xp_reward }}</td>
-            <td><strong style="color: #4ade80;">{{ q.correct_option }}</strong></td>
-            <td>
-                <div class="actions">
-                    <a href="/admin/questions/{{ q.id }}/edit" class="btn-sm btn-warning">ویرایش</a>
-                    {% if current_user.role == "admin" %}
-                    <form method="POST" action="/admin/questions/{{ q.id }}/delete"
-                          onsubmit="return confirm('مطمئنی میخوای این سوال رو حذف کنی؟');">
-                        <button type="submit" class="btn-sm btn-danger">حذف</button>
-                    </form>
-                    {% endif %}
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>سوال</th>
+                <th>دسته</th>
+                <th>سطح</th>
+                <th>XP</th>
+                <th>جواب</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for q in questions %}
+            <tr>
+                <td class="text-muted">{{ q.id }}</td>
+                <td style="max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ q.text }}">
+                    {{ q.text }}
+                </td>
+                <td><span class="badge badge-gray">{{ q.category }}</span></td>
+                <td>
+                    <span class="badge {% if q.difficulty == 'easy' %}badge-success{% elif q.difficulty == 'medium' %}badge-warning{% else %}badge-danger{% endif %}">
+                        {{ q.difficulty }}
+                    </span>
+                </td>
+                <td>{{ q.xp_reward }}</td>
+                <td><strong style="color: #4ade80;">{{ q.correct_option | upper }}</strong></td>
+                <td>
+                    <div class="flex flex-wrap gap-1">
+                        <a href="/admin/questions/{{ q.id }}/edit" class="btn-icon btn-edit">ویرایش</a>
+                        {% if current_user.role == "admin" %}
+                        <form method="POST" action="/admin/questions/{{ q.id }}/delete" style="display: inline;"
+                              onsubmit="return confirm('مطمئنی میخوای این سوال رو حذف کنی؟');">
+                            <button type="submit" class="btn-icon btn-delete">حذف</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
     {% else %}
     <div class="empty">
-        هنوز سوالی نداری. <a href="/admin/questions/new" style="color: #60a5fa;">اولی رو اضافه کن!</a>
+        <div class="empty-icon">📝</div>
+        هنوز سوالی نداری.
+        <div class="mt-2">
+            <a href="/admin/questions/new" class="btn btn-primary btn-shine">اولی رو اضافه کن!</a>
+        </div>
     </div>
     {% endif %}
 </div>
+
 {% endblock %}

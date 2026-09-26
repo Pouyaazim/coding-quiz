@@ -1,349 +1,77 @@
 {% extends "admin/base.html" %}
 
-{% block title %}تلاش‌ها - پنل مدیریت{% endblock %}
+{% block title %}تلاش‌ها — پنل مدیریت{% endblock %}
 {% block page_title %}📈 تحلیل تلاش‌ها{% endblock %}
 
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-    .stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-        gap: 18px;
-        margin-bottom: 30px;
-    }
-    .stat-card {
-        background: linear-gradient(135deg, #1e293b 0%, #1a2332 100%);
-        padding: 22px;
-        border-radius: 16px;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid #334155;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 4px;
-        height: 100%;
-        background: #3b82f6;
-    }
-    .stat-card.correct::before { background: linear-gradient(180deg, #22c55e, #16a34a); }
-    .stat-card.wrong::before { background: linear-gradient(180deg, #ef4444, #dc2626); }
-    .stat-card.accent::before { background: linear-gradient(180deg, #a855f7, #7c3aed); }
-    .stat-card.today::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
-
-    .stat-icon {
-        font-size: 1.5rem;
-        margin-bottom: 8px;
-        opacity: 0.8;
-    }
-    .stat-value {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin-bottom: 4px;
-        line-height: 1;
-    }
-    .stat-label {
-        color: #94a3b8;
-        font-size: 0.85rem;
-        letter-spacing: 0.3px;
-    }
-    .stat-card.correct .stat-value { color: #4ade80; }
-    .stat-card.wrong .stat-value { color: #f87171; }
-    .stat-card.accent .stat-value { color: #c084fc; }
-    .stat-card.today .stat-value { color: #fbbf24; }
-
-    /* Period Filter */
-    .period-filter {
-        display: flex;
-        gap: 8px;
-        background: #1e293b;
-        padding: 6px;
-        border-radius: 12px;
-        margin-bottom: 20px;
-        width: fit-content;
-        border: 1px solid #334155;
-    }
-    .period-btn {
-        padding: 8px 18px;
-        border-radius: 8px;
-        text-decoration: none;
-        color: #94a3b8;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-        font-weight: 500;
-    }
-    .period-btn:hover {
-        color: white;
-        background: #334155;
-    }
-    .period-btn.active {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        color: white;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-    }
-
-    /* Charts */
-    .charts-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 20px;
-        margin-bottom: 25px;
-    }
-    @media (max-width: 1000px) {
-        .charts-grid { grid-template-columns: 1fr; }
-    }
-    .chart-card {
-        background: linear-gradient(135deg, #1e293b 0%, #1a2332 100%);
-        padding: 25px;
-        border-radius: 16px;
-        border: 1px solid #334155;
-        transition: box-shadow 0.2s;
-    }
-    .chart-card:hover {
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    .chart-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    .chart-title {
-        font-size: 1rem;
-        color: #e2e8f0;
-        font-weight: 600;
-        margin: 0;
-    }
-    .chart-subtitle {
-        font-size: 0.8rem;
-        color: #64748b;
-    }
-    .chart-container {
-        position: relative;
-        height: 260px;
-    }
-
-    /* Table toolbar */
-    .toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .filter-btns {
-        display: flex;
-        gap: 8px;
-    }
-    .filter-btn {
-        padding: 8px 16px;
-        border-radius: 8px;
-        text-decoration: none;
-        color: #cbd5e1;
-        background: #1e293b;
-        font-size: 0.85rem;
-        border: 1px solid #334155;
-        transition: all 0.2s;
-    }
-    .filter-btn:hover {
-        background: #334155;
-        color: white;
-    }
-    .filter-btn.active {
-        background: #3b82f6;
-        color: white;
-        border-color: #3b82f6;
-    }
-
-    /* Table */
-    .section {
-        background: linear-gradient(135deg, #1e293b 0%, #1a2332 100%);
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px solid #334155;
-    }
-    table { width: 100%; border-collapse: collapse; }
-    th {
-        padding: 15px 18px;
-        text-align: right;
-        color: #94a3b8;
-        font-weight: 500;
-        font-size: 0.85rem;
-        background: #0f172a;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    td {
-        padding: 14px 18px;
-        text-align: right;
-        border-bottom: 1px solid #1e293b;
-        font-size: 0.9rem;
-    }
-    tr:last-child td { border-bottom: none; }
-    tbody tr {
-        transition: background 0.15s;
-    }
-    tbody tr:hover {
-        background: #0f172a;
-    }
-    .badge {
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 500;
-    }
-    .badge-yes {
-        background: rgba(34, 197, 94, 0.15);
-        color: #4ade80;
-        border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-    .badge-no {
-        background: rgba(239, 68, 68, 0.15);
-        color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-    .option-pill {
-        display: inline-block;
-        padding: 3px 10px;
-        background: #0f172a;
-        border-radius: 6px;
-        font-family: monospace;
-        font-size: 0.85rem;
-        color: #60a5fa;
-        border: 1px solid #334155;
-    }
-    .user-cell {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6, #7c3aed);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 0.85rem;
-        flex-shrink: 0;
-    }
-    .q-text {
-        max-width: 280px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: #cbd5e1;
-    }
-    .time-cell {
-        color: #64748b;
-        font-size: 0.85rem;
-    }
-    .empty {
-        text-align: center;
-        padding: 60px 20px;
-        color: #94a3b8;
-    }
-    .empty-icon {
-        font-size: 3rem;
-        margin-bottom: 10px;
-        opacity: 0.5;
-    }
-</style>
-
-<!-- Stats Cards -->
-<div class="stats">
+<div class="stats-grid" style="animation: fadeInUp 0.5s ease-out both;">
     <div class="stat-card">
         <div class="stat-icon">🎯</div>
-        <div class="stat-value">{{ total }}</div>
+        <div class="stat-value" data-counter="{{ total }}">0</div>
         <div class="stat-label">کل تلاش</div>
     </div>
-    <div class="stat-card correct">
+    <div class="stat-card success">
         <div class="stat-icon">✅</div>
-        <div class="stat-value">{{ correct_count }}</div>
-        <div class="stat-label">پاسخ درست</div>
+        <div class="stat-value" data-counter="{{ correct_count }}">0</div>
+        <div class="stat-label">درست</div>
     </div>
-    <div class="stat-card wrong">
+    <div class="stat-card danger">
         <div class="stat-icon">❌</div>
-        <div class="stat-value">{{ wrong_count }}</div>
-        <div class="stat-label">پاسخ اشتباه</div>
+        <div class="stat-value" data-counter="{{ wrong_count }}">0</div>
+        <div class="stat-label">اشتباه</div>
     </div>
     <div class="stat-card accent">
         <div class="stat-icon">📊</div>
         <div class="stat-value">{{ accuracy }}%</div>
         <div class="stat-label">دقت کلی</div>
     </div>
-    <div class="stat-card today">
+    <div class="stat-card warning">
         <div class="stat-icon">🔥</div>
-        <div class="stat-value">{{ today_count }}</div>
-        <div class="stat-label">تلاش امروز</div>
+        <div class="stat-value" data-counter="{{ today_count }}">0</div>
+        <div class="stat-label">امروز</div>
     </div>
 </div>
 
 <!-- Period Filter -->
-<div class="period-filter">
-    <a href="/admin/attempts?period=7&filter_type={{ filter_type }}" class="period-btn {% if period == 7 %}active{% endif %}">۷ روز</a>
-    <a href="/admin/attempts?period=14&filter_type={{ filter_type }}" class="period-btn {% if period == 14 %}active{% endif %}">۱۴ روز</a>
-    <a href="/admin/attempts?period=30&filter_type={{ filter_type }}" class="period-btn {% if period == 30 %}active{% endif %}">۳۰ روز</a>
-    <a href="/admin/attempts?period=90&filter_type={{ filter_type }}" class="period-btn {% if period == 90 %}active{% endif %}">۹۰ روز</a>
+<div class="glass-card" style="padding: 8px; margin-bottom: 20px; animation: fadeInUp 0.5s ease-out 0.1s both; display: inline-flex; gap: 6px; flex-wrap: wrap;">
+    <a href="/admin/attempts?period=7&filter_type={{ filter_type }}" class="btn {% if period == 7 %}btn-primary{% else %}btn-ghost{% endif %} btn-shine" style="padding: 8px 18px; font-size: 0.9rem;">۷ روز</a>
+    <a href="/admin/attempts?period=14&filter_type={{ filter_type }}" class="btn {% if period == 14 %}btn-primary{% else %}btn-ghost{% endif %} btn-shine" style="padding: 8px 18px; font-size: 0.9rem;">۱۴ روز</a>
+    <a href="/admin/attempts?period=30&filter_type={{ filter_type }}" class="btn {% if period == 30 %}btn-primary{% else %}btn-ghost{% endif %} btn-shine" style="padding: 8px 18px; font-size: 0.9rem;">۳۰ روز</a>
+    <a href="/admin/attempts?period=90&filter_type={{ filter_type }}" class="btn {% if period == 90 %}btn-primary{% else %}btn-ghost{% endif %} btn-shine" style="padding: 8px 18px; font-size: 0.9rem;">۹۰ روز</a>
 </div>
 
 <!-- Charts -->
-<div class="charts-grid">
-    <div class="chart-card">
-        <div class="chart-header">
-            <h3 class="chart-title">روند تلاش‌ها</h3>
-            <span class="chart-subtitle">{{ period }} روز گذشته</span>
-        </div>
-        <div class="chart-container">
-            <canvas id="dailyChart"></canvas>
-        </div>
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px;">
+    <div class="glass-card" style="padding: 24px; animation: fadeInUp 0.6s ease-out 0.15s both;">
+        <h3 style="margin: 0 0 18px; font-size: 1rem; color: var(--accent-secondary);">روند تلاش‌ها ({{ period }} روز)</h3>
+        <div style="height: 260px;"><canvas id="dailyChart"></canvas></div>
     </div>
-    <div class="chart-card">
-        <div class="chart-header">
-            <h3 class="chart-title">سطح سوالات</h3>
-        </div>
-        <div class="chart-container">
-            <canvas id="difficultyChart"></canvas>
-        </div>
+    <div class="glass-card" style="padding: 24px; animation: fadeInUp 0.6s ease-out 0.2s both;">
+        <h3 style="margin: 0 0 18px; font-size: 1rem; color: var(--accent-secondary);">سطح سوالات</h3>
+        <div style="height: 260px;"><canvas id="difficultyChart"></canvas></div>
     </div>
 </div>
 
-<div class="charts-grid" style="grid-template-columns: 1fr;">
-    <div class="chart-card">
-        <div class="chart-header">
-            <h3 class="chart-title">دسته‌بندی سوالات</h3>
-        </div>
-        <div class="chart-container" style="height: 220px;">
-            <canvas id="categoryChart"></canvas>
-        </div>
+<div class="glass-card" style="padding: 24px; margin-bottom: 24px; animation: fadeInUp 0.6s ease-out 0.25s both;">
+    <h3 style="margin: 0 0 18px; font-size: 1rem; color: var(--accent-secondary);">دسته‌بندی سوالات</h3>
+    <div style="height: 220px;"><canvas id="categoryChart"></canvas></div>
+</div>
+
+<!-- Filter Buttons -->
+<div class="flex justify-between items-center mb-3" style="flex-wrap: wrap; gap: 12px; animation: fadeInUp 0.5s ease-out 0.3s both;">
+    <h3 style="margin: 0; font-size: 1.05rem;">آخرین تلاش‌ها</h3>
+    <div class="flex gap-1">
+        <a href="/admin/attempts?filter_type=all&period={{ period }}" class="btn {% if filter_type == 'all' %}btn-primary{% else %}btn-ghost{% endif %} btn-shine" style="padding: 8px 16px; font-size: 0.85rem;">همه</a>
+        <a href="/admin/attempts?filter_type=correct&period={{ period }}" class="btn {% if filter_type == 'correct' %}btn-success{% else %}btn-ghost{% endif %} btn-shine" style="padding: 8px 16px; font-size: 0.85rem;">✅ درست</a>
+        <a href="/admin/attempts?filter_type=wrong&period={{ period }}" class="btn {% if filter_type == 'wrong' %}btn-danger{% else %}btn-ghost{% endif %} btn-shine" style="padding: 8px 16px; font-size: 0.85rem;">❌ اشتباه</a>
     </div>
 </div>
 
-<!-- Table -->
-<div class="toolbar">
-    <h3 style="margin: 0; font-size: 1rem; color: #e2e8f0;">آخرین تلاش‌ها</h3>
-    <div class="filter-btns">
-        <a href="/admin/attempts?filter_type=all&period={{ period }}" class="filter-btn {% if filter_type == 'all' %}active{% endif %}">همه</a>
-        <a href="/admin/attempts?filter_type=correct&period={{ period }}" class="filter-btn {% if filter_type == 'correct' %}active{% endif %}">✅ درست</a>
-        <a href="/admin/attempts?filter_type=wrong&period={{ period }}" class="filter-btn {% if filter_type == 'wrong' %}active{% endif %}">❌ اشتباه</a>
-    </div>
-</div>
-
-<div class="section">
+<div class="admin-table-wrap" style="animation: fadeInUp 0.6s ease-out 0.35s both;">
     {% if attempts %}
-    <table>
+    <table class="admin-table">
         <thead>
             <tr>
                 <th>#</th>
@@ -357,12 +85,12 @@
         <tbody>
             {% for a in attempts %}
             <tr>
-                <td style="color: #64748b;">{{ a.id }}</td>
+                <td class="text-muted">{{ a.id }}</td>
                 <td>
-                    <div class="user-cell">
-                       <div class="avatar" style="overflow: hidden;">
+                    <div class="flex items-center gap-1">
+                        <div class="avatar avatar-xs">
                             {% if a.user.avatar_data %}
-                                <img src="/avatar/{{ a.user.id }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                <img src="/avatar/{{ a.user.id }}" alt="avatar">
                             {% else %}
                                 {{ a.user.username[0] | upper }}
                             {% endif %}
@@ -370,18 +98,18 @@
                         <span>{{ a.user.username }}</span>
                     </div>
                 </td>
-                <td>
-                    <div class="q-text" title="{{ a.question.text }}">{{ a.question.text }}</div>
+                <td style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ a.question.text }}">
+                    {{ a.question.text }}
                 </td>
-                <td><span class="option-pill">{{ a.selected_option | upper }}</span></td>
+                <td><span class="badge badge-primary" style="font-family: monospace;">{{ a.selected_option | upper }}</span></td>
                 <td>
                     {% if a.is_correct %}
-                        <span class="badge badge-yes">✅ درست</span>
+                        <span class="badge badge-success">✅ درست</span>
                     {% else %}
-                        <span class="badge badge-no">❌ اشتباه</span>
+                        <span class="badge badge-danger">❌ اشتباه</span>
                     {% endif %}
                 </td>
-                <td class="time-cell">{{ a.created_at.strftime("%m/%d %H:%M") }}</td>
+                <td class="text-muted" style="font-size: 0.85rem;">{{ a.created_at.strftime("%m/%d %H:%M") }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -394,123 +122,94 @@
     {% endif %}
 </div>
 
+{% endblock %}
+
+{% block scripts %}
 <script>
     Chart.defaults.color = '#94a3b8';
-    Chart.defaults.font.family = 'Tahoma, sans-serif';
+    Chart.defaults.font.family = 'Vazirmatn, Tahoma, sans-serif';
 
-    // نمودار روند
     new Chart(document.getElementById('dailyChart'), {
         type: 'line',
         data: {
             labels: {{ days | tojson }},
             datasets: [
                 {
-                    label: 'کل تلاش',
+                    label: 'کل',
                     data: {{ daily_total | tojson }},
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.15)',
                     tension: 0.4,
                     fill: true,
                     borderWidth: 2,
-                    pointRadius: 3,
-                    pointHoverRadius: 6,
-                    pointBackgroundColor: '#3b82f6',
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#8b5cf6',
+                    pointBorderColor: '#0a0a14',
+                    pointBorderWidth: 2,
                 },
                 {
                     label: 'درست',
                     data: {{ daily_correct | tojson }},
-                    borderColor: '#4ade80',
-                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
                     tension: 0.4,
                     fill: true,
                     borderWidth: 2,
-                    pointRadius: 3,
-                    pointHoverRadius: 6,
-                    pointBackgroundColor: '#4ade80',
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#0a0a14',
+                    pointBorderWidth: 2,
                 },
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index',
-            },
+            interaction: { intersect: false, mode: 'index' },
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 12,
-                        padding: 15,
-                        font: { size: 12 }
-                    }
-                },
-                tooltip: {
-                    backgroundColor: '#0f172a',
-                    borderColor: '#334155',
-                    borderWidth: 1,
-                    padding: 12,
-                    cornerRadius: 8,
-                }
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 12 } } },
+                tooltip: { backgroundColor: '#0a0a14', borderColor: '#8b5cf6', borderWidth: 1, padding: 12, cornerRadius: 10 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1, color: '#64748b' },
-                    grid: { color: 'rgba(51, 65, 85, 0.5)' },
-                    border: { display: false }
-                },
-                x: {
-                    grid: { display: false },
-                    border: { display: false }
-                }
+                y: { beginAtZero: true, ticks: { stepSize: 1, color: '#64748b' }, grid: { color: 'rgba(139, 92, 246, 0.08)' }, border: { display: false } },
+                x: { grid: { display: false }, border: { display: false } }
             }
         }
     });
 
-    // نمودار سطح دشواری
     new Chart(document.getElementById('difficultyChart'), {
         type: 'doughnut',
         data: {
             labels: {{ difficulty_labels | tojson }},
             datasets: [{
                 data: {{ difficulty_data | tojson }},
-                backgroundColor: ['#22c55e', '#f59e0b', '#ef4444', '#3b82f6'],
-                borderColor: '#1e293b',
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6'],
+                borderColor: '#0a0a14',
                 borderWidth: 4,
-                hoverOffset: 8,
+                hoverOffset: 10,
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             cutout: '65%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 12,
-                        padding: 12,
-                        font: { size: 12 }
-                    }
-                }
-            }
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 12 } } } }
         }
     });
 
-    // نمودار دسته‌بندی
     new Chart(document.getElementById('categoryChart'), {
         type: 'bar',
         data: {
             labels: {{ category_labels | tojson }},
             datasets: [{
-                label: 'تعداد تلاش',
+                label: 'تعداد',
                 data: {{ category_data | tojson }},
-                backgroundColor: 'rgba(168, 85, 247, 0.6)',
-                borderColor: '#a855f7',
+                backgroundColor: 'rgba(236, 72, 153, 0.5)',
+                borderColor: '#ec4899',
                 borderWidth: 2,
-                borderRadius: 8,
+                borderRadius: 10,
                 borderSkipped: false,
                 maxBarThickness: 60,
             }]
@@ -518,20 +217,10 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1, color: '#64748b' },
-                    grid: { color: 'rgba(51, 65, 85, 0.5)' },
-                    border: { display: false }
-                },
-                x: {
-                    grid: { display: false },
-                    border: { display: false }
-                }
+                y: { beginAtZero: true, ticks: { stepSize: 1, color: '#64748b' }, grid: { color: 'rgba(139, 92, 246, 0.08)' }, border: { display: false } },
+                x: { grid: { display: false }, border: { display: false } }
             }
         }
     });

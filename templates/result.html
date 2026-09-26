@@ -1,124 +1,39 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>نتیجه</title>
-    <link rel="icon" href="https://emojicons.dev/🕹️" />
-    <style>
-        body {
-            font-family: Tahoma, sans-serif;
-            background: #0f172a;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-        .card {
-            background: #1e293b;
-            padding: 40px 50px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-        }
-        .icon {
-            font-size: 4rem;
-            margin-bottom: 10px;
-        }
-        h1 {
-            margin: 10px 0;
-        }
-        p {
-            color: #94a3b8;
-            font-size: 1.05rem;
-        }
-        .xp-earned {
-            color: #4ade80;
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin: 15px 0;
-        }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 30px;
-            background: #3b82f6;
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-        }
-        a:hover { background: #2563eb; }
+{% extends "base.html" %}
 
-        .level-box {
-            background: #0f172a;
-            padding: 18px;
-            border-radius: 12px;
-            margin: 20px 0;
-            border: 1px solid #334155;
-        }
-        .level-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .level-badge {
-            background: linear-gradient(135deg, #7c3aed, #3b82f6);
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.95rem;
-        }
-        .xp-text {
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-        .xp-text strong {
-            color: #60a5fa;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background: #1e293b;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #7c3aed);
-            border-radius: 10px;
-            transition: width 0.5s ease;
-        }
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 6px;
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-    </style>
-</head>
-<body>
-    <div class="card">
+{% block title %}نتیجه — Coding Quiz{% endblock %}
+{% block container_class %}container-narrow{% endblock %}
+
+{% block content %}
+<div class="glass-card tilt-card reveal-scale" style="padding: 50px 40px; text-align: center;">
+    <div class="tilt-glare"></div>
+    <div class="tilt-inner">
+
         {% if is_correct %}
-            <div class="icon">✅</div>
-            <h1>درست بود!</h1>
-            <p class="xp-earned">+{{ xp_reward }} XP 🎉</p>
+            <div class="result-icon success bounce-in">✅</div>
+            <h1 class="hero-title text-shimmer reveal" style="font-size: 2.2rem; transition-delay: 0.1s;">
+                درست بود!
+            </h1>
+            <p class="reveal" style="font-size: 1.3rem; color: #6ee7b7; font-weight: 700; margin: 16px 0; transition-delay: 0.2s;">
+                +{{ xp_reward }} XP 🎉
+            </p>
         {% else %}
-            <div class="icon">❌</div>
-            <h1>اشتباه بود</h1>
-            <p>جواب درست: <strong style="color: #4ade80;">{{ correct_answer }}</strong></p>
+            <div class="result-icon danger shake-in">❌</div>
+            <h1 class="hero-title reveal" style="font-size: 2.2rem; transition-delay: 0.1s;">
+                اشتباه بود
+            </h1>
+            <p class="reveal" style="margin: 16px 0; transition-delay: 0.2s;">
+                جواب درست:
+                <strong style="color: var(--success); font-size: 1.1rem;">{{ correct_answer }}</strong>
+            </p>
         {% endif %}
 
-        <div class="level-box">
+        <!-- Level Progress -->
+        <div class="level-box reveal" style="transition-delay: 0.3s; margin: 30px 0;">
             <div class="level-header">
                 <span class="level-badge">سطح {{ progress.level }}</span>
                 <span class="xp-text"><strong>{{ progress.xp_current }}</strong> XP</span>
             </div>
-            <div class="progress-bar">
+            <div class="progress">
                 <div class="progress-fill" style="width: {{ progress.progress }}%;"></div>
             </div>
             <div class="progress-label">
@@ -127,7 +42,49 @@
             </div>
         </div>
 
-        <a href="/quiz">سوال بعدی</a>
+        <div class="flex flex-wrap gap-1 justify-center reveal" style="transition-delay: 0.4s;">
+            <a href="/quiz" class="btn btn-primary btn-shine btn-lg">سوال بعدی 🎮</a>
+            <a href="/" class="btn btn-ghost btn-shine">صفحه اصلی</a>
+        </div>
+
     </div>
-</body>
-</html>
+</div>
+
+<style>
+    .result-icon {
+        font-size: 5rem;
+        line-height: 1;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+    .bounce-in { animation: bounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+    .shake-in { animation: shake 0.6s ease-in-out; }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px) rotate(-5deg); }
+        75% { transform: translateX(10px) rotate(5deg); }
+    }
+</style>
+
+<script>
+    // Confetti effect
+    {% if is_correct %}
+    document.addEventListener('DOMContentLoaded', () => {
+        const colors = ['#8b5cf6', '#06b6d4', '#ec4899', '#10b981', '#f59e0b'];
+        for (let i = 0; i < 40; i++) {
+            setTimeout(() => {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + '%';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDelay = Math.random() * 0.5 + 's';
+                piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                document.body.appendChild(piece);
+                setTimeout(() => piece.remove(), 4000);
+            }, i * 30);
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}

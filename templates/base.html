@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Coding Quiz{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="/static/style.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Aurora Background -->
+    <div class="aurora-container">
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+    </div>
+
+    {% block body %}
+    <div class="page-wrapper">
+        <div class="container {% block container_class %}{% endblock %}">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    {% endblock %}
+
+    <script src="/static/animations.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

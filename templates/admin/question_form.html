@@ -1,137 +1,80 @@
 {% extends "admin/base.html" %}
 
-{% block title %}{% if question %}ویرایش{% else %}سوال جدید{% endif %} - پنل مدیریت{% endblock %}
+{% block title %}{% if question %}ویرایش سوال{% else %}سوال جدید{% endif %} — پنل مدیریت{% endblock %}
 {% block page_title %}{% if question %}✏️ ویرایش سوال{% else %}➕ سوال جدید{% endif %}{% endblock %}
 
 {% block content %}
-<style>
-    .form-card {
-        background: #1e293b;
-        padding: 35px;
-        border-radius: 15px;
-        max-width: 800px;
-    }
-    label {
-        display: block;
-        margin-bottom: 8px;
-        margin-top: 20px;
-        color: #94a3b8;
-        font-size: 0.9rem;
-    }
-    label:first-of-type { margin-top: 0; }
-    input[type="text"],
-    input[type="number"],
-    textarea,
-    select {
-        width: 100%;
-        padding: 12px;
-        border-radius: 10px;
-        border: 1px solid #334155;
-        background: #0f172a;
-        color: white;
-        box-sizing: border-box;
-        font-size: 1rem;
-        font-family: inherit;
-    }
-    input:focus, textarea:focus, select:focus {
-        outline: none;
-        border-color: #3b82f6;
-    }
-    textarea {
-        min-height: 100px;
-        resize: vertical;
-    }
-    .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-    }
-    .actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 30px;
-    }
-    .btn {
-        padding: 12px 25px;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        font-size: 1rem;
-        font-family: inherit;
-        text-decoration: none;
-        color: white;
-    }
-    .btn-primary { background: #3b82f6; }
-    .btn-primary:hover { background: #2563eb; }
-    .btn-gray { background: #475569; }
-    .btn-gray:hover { background: #334155; }
-    .hint {
-        color: #64748b;
-        font-size: 0.85rem;
-        margin-top: 5px;
-    }
-</style>
 
-<form method="POST"
-      action="{% if question %}/admin/questions/{{ question.id }}/edit{% else %}/admin/questions/new{% endif %}"
-      class="form-card">
+<div class="glass-card reveal-scale" style="padding: 35px; max-width: 800px;">
 
-    <label>متن سوال</label>
-    <textarea name="text" required>{% if question %}{{ question.text }}{% endif %}</textarea>
+    <form method="POST"
+          action="{% if question %}/admin/questions/{{ question.id }}/edit{% else %}/admin/questions/new{% endif %}">
 
-    <div class="row">
-        <div>
-            <label>گزینه A</label>
-            <input type="text" name="option_a" required value="{% if question %}{{ question.option_a }}{% endif %}">
+        <div class="input-group reveal">
+            <label class="input-label">متن سوال</label>
+            <textarea name="text" class="input" rows="3" required style="resize: vertical; min-height: 100px;">{% if question %}{{ question.text }}{% endif %}</textarea>
         </div>
-        <div>
-            <label>گزینه B</label>
-            <input type="text" name="option_b" required value="{% if question %}{{ question.option_b }}{% endif %}">
-        </div>
-        <div>
-            <label>گزینه C</label>
-            <input type="text" name="option_c" required value="{% if question %}{{ question.option_c }}{% endif %}">
-        </div>
-        <div>
-            <label>گزینه D</label>
-            <input type="text" name="option_d" required value="{% if question %}{{ question.option_d }}{% endif %}">
-        </div>
-    </div>
 
-    <label>جواب درست</label>
-    <select name="correct_option" required>
-        <option value="a" {% if question and question.correct_option == "a" %}selected{% endif %}>A</option>
-        <option value="b" {% if question and question.correct_option == "b" %}selected{% endif %}>B</option>
-        <option value="c" {% if question and question.correct_option == "c" %}selected{% endif %}>C</option>
-        <option value="d" {% if question and question.correct_option == "d" %}selected{% endif %}>D</option>
-    </select>
-
-    <div class="row">
-        <div>
-            <label>دسته‌بندی</label>
-            <input type="text" name="category"
-                   value="{% if question %}{{ question.category }}{% else %}python{% endif %}">
-            <div class="hint">مثلاً: python، javascript، algorithm</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="input-group reveal" style="transition-delay: 0.05s;">
+                <label class="input-label">گزینه A</label>
+                <input type="text" name="option_a" class="input" required value="{% if question %}{{ question.option_a }}{% endif %}">
+            </div>
+            <div class="input-group reveal" style="transition-delay: 0.1s;">
+                <label class="input-label">گزینه B</label>
+                <input type="text" name="option_b" class="input" required value="{% if question %}{{ question.option_b }}{% endif %}">
+            </div>
+            <div class="input-group reveal" style="transition-delay: 0.15s;">
+                <label class="input-label">گزینه C</label>
+                <input type="text" name="option_c" class="input" required value="{% if question %}{{ question.option_c }}{% endif %}">
+            </div>
+            <div class="input-group reveal" style="transition-delay: 0.2s;">
+                <label class="input-label">گزینه D</label>
+                <input type="text" name="option_d" class="input" required value="{% if question %}{{ question.option_d }}{% endif %}">
+            </div>
         </div>
-        <div>
-            <label>سطح</label>
-            <select name="difficulty">
-                <option value="easy" {% if question and question.difficulty == "easy" %}selected{% endif %}>easy</option>
-                <option value="medium" {% if question and question.difficulty == "medium" %}selected{% endif %}>medium</option>
-                <option value="hard" {% if question and question.difficulty == "hard" %}selected{% endif %}>hard</option>
+
+        <div class="input-group reveal" style="transition-delay: 0.25s;">
+            <label class="input-label">جواب درست</label>
+            <select name="correct_option" class="input" required>
+                <option value="a" {% if question and question.correct_option == "a" %}selected{% endif %}>A</option>
+                <option value="b" {% if question and question.correct_option == "b" %}selected{% endif %}>B</option>
+                <option value="c" {% if question and question.correct_option == "c" %}selected{% endif %}>C</option>
+                <option value="d" {% if question and question.correct_option == "d" %}selected{% endif %}>D</option>
             </select>
         </div>
-    </div>
 
-    <label>جایزه XP</label>
-    <input type="number" name="xp_reward" min="1" max="100"
-           value="{% if question %}{{ question.xp_reward }}{% else %}10{% endif %}">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="input-group reveal" style="transition-delay: 0.3s;">
+                <label class="input-label">دسته‌بندی</label>
+                <input type="text" name="category" class="input"
+                       value="{% if question %}{{ question.category }}{% else %}python{% endif %}">
+                <p class="text-muted mt-1" style="font-size: 0.78rem;">مثلاً: python، javascript، algorithm</p>
+            </div>
+            <div class="input-group reveal" style="transition-delay: 0.35s;">
+                <label class="input-label">سطح</label>
+                <select name="difficulty" class="input">
+                    <option value="easy" {% if question and question.difficulty == "easy" %}selected{% endif %}>easy</option>
+                    <option value="medium" {% if question and question.difficulty == "medium" %}selected{% endif %}>medium</option>
+                    <option value="hard" {% if question and question.difficulty == "hard" %}selected{% endif %}>hard</option>
+                </select>
+            </div>
+        </div>
 
-    <div class="actions">
-        <button type="submit" class="btn btn-primary">
-            {% if question %}ذخیره تغییرات{% else %}اضافه کن{% endif %}
-        </button>
-        <a href="/admin/questions" class="btn btn-gray">انصراف</a>
-    </div>
-</form>
+        <div class="input-group reveal" style="transition-delay: 0.4s;">
+            <label class="input-label">جایزه XP</label>
+            <input type="number" name="xp_reward" class="input" min="1" max="100"
+                   value="{% if question %}{{ question.xp_reward }}{% else %}10{% endif %}">
+        </div>
+
+        <div class="flex flex-wrap gap-1 reveal" style="transition-delay: 0.45s; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary btn-shine">
+                {% if question %}ذخیره تغییرات{% else %}اضافه کن{% endif %}
+            </button>
+            <a href="/admin/questions" class="btn btn-ghost btn-shine">انصراف</a>
+        </div>
+
+    </form>
+</div>
+
 {% endblock %}

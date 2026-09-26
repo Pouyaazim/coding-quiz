@@ -1,155 +1,42 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>Coding Quiz</title>
-    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-    <style>
-        body {
-            font-family: Tahoma, sans-serif;
-            background: #0f172a;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-        .card {
-            background: #1e293b;
-            padding: 40px 50px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
-            max-width: 500px;
-            width: 100%;
-        }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        p {
-            color: #94a3b8;
-            font-size: 1.1rem;
-        }
-        a {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 12px 30px;
-            background: #3b82f6;
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-size: 1rem;
-        }
-        a:hover { background: #2563eb; }
-        .gray { background: #475569; }
-        .gray:hover { background: #334155; }
-        .green { background: #16a34a; }
-        .green:hover { background: #15803d; }
-        .purple { background: #7c3aed; }
-        .purple:hover { background: #6d28d9; }
-        .sky { background: #0ea5e9; }
-        .sky:hover { background: #0284c7; }
+{% extends "base.html" %}
 
-        .welcome {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-        .avatar-small {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6, #7c3aed);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            overflow: hidden;
-            border: 3px solid #334155;
-            flex-shrink: 0;
-        }
-        .avatar-small img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+{% block title %}Coding Quiz — صفحه اصلی{% endblock %}
+{% block container_class %}container-narrow{% endblock %}
 
-        .level-box {
-            background: #0f172a;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border: 1px solid #334155;
-        }
-        .level-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .level-badge {
-            background: linear-gradient(135deg, #7c3aed, #3b82f6);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 1rem;
-        }
-        .xp-text {
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-        .xp-text strong { color: #60a5fa; }
-        .progress-bar {
-            width: 100%;
-            height: 12px;
-            background: #1e293b;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #7c3aed);
-            border-radius: 10px;
-            transition: width 0.5s ease;
-            box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
-        }
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 8px;
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>🎮 Coding Quiz</h1>
+{% block content %}
+<div class="glass-card tilt-card reveal-scale" style="padding: 50px 40px;">
+    <div class="tilt-glare"></div>
+    <div class="tilt-inner">
+
+        <h1 class="hero-title text-shimmer reveal">
+            🎮 Coding Quiz
+        </h1>
 
         {% if user %}
-            <div class="welcome">
-                <div class="avatar-small">
+            <div class="flex items-center justify-center gap-2 mb-3 reveal" style="transition-delay: 0.1s;">
+                <div class="avatar avatar-lg avatar-ring float">
                     {% if user.avatar_data %}
                         <img src="/avatar/{{ user.id }}" alt="avatar">
                     {% else %}
                         {{ user.username[0] | upper }}
                     {% endif %}
                 </div>
-                <p style="margin: 0;">خوش اومدی، <strong style="color: white;">{{ user.username }}</strong>! 🎉</p>
+                <div style="text-align: right;">
+                    <p style="margin: 0; font-size: 1.2rem; font-weight: 700;">
+                        {{ user.username }}
+                    </p>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">
+                        سطح {{ progress.level }} — {{ user.xp }} XP
+                    </p>
+                </div>
             </div>
 
-            <div class="level-box">
+            <div class="level-box reveal" style="transition-delay: 0.2s;">
                 <div class="level-header">
                     <span class="level-badge">سطح {{ progress.level }}</span>
                     <span class="xp-text"><strong>{{ user.xp }}</strong> XP</span>
                 </div>
-                <div class="progress-bar">
+                <div class="progress">
                     <div class="progress-fill" style="width: {{ progress.progress }}%;"></div>
                 </div>
                 <div class="progress-label">
@@ -158,18 +45,26 @@
                 </div>
             </div>
 
-            <a href="/profile" class="sky">👤 پروفایل</a>
-            <a href="/quiz">شروع کوییز 🎮</a>
-            <a href="/leaderboard" class="green">🏆 لیست بهترین‌ها</a>
-            {% if user.role in ("admin", "writer") %}
-                <a href="/admin/panel" class="purple">پنل مدیریت 🛠</a>
-            {% endif %}
-            <a href="/logout" class="gray">خروج</a>
+            <div class="action-grid reveal" style="transition-delay: 0.3s;">
+                <a href="/quiz" class="btn btn-primary btn-shine glow-pulse">🎮 شروع کوییز</a>
+                <a href="/leaderboard" class="btn btn-success btn-shine">🏆 لیست بهترین‌ها</a>
+                <a href="/profile" class="btn btn-ghost btn-shine">👤 پروفایل</a>
+                {% if user.role in ("admin", "writer") %}
+                    <a href="/admin/panel" class="btn btn-ghost btn-shine">🛠 پنل مدیریت</a>
+                {% endif %}
+                <a href="/logout" class="btn btn-secondary btn-shine">خروج</a>
+            </div>
+
         {% else %}
-            <p>به بازی-آموزش برنامه‌نویسی خوش اومدی!</p>
-            <a href="/register">ثبت‌نام</a>
-            <a href="/login" class="gray">ورود</a>
+            <p class="hero-subtitle reveal" style="transition-delay: 0.1s;">
+                به بازی-آموزش برنامه‌نویسی خوش اومدی! 🚀
+            </p>
+            <div class="action-grid reveal" style="transition-delay: 0.2s;">
+                <a href="/register" class="btn btn-primary btn-shine btn-lg glow-pulse">ثبت‌نام</a>
+                <a href="/login" class="btn btn-secondary btn-shine btn-lg">ورود</a>
+            </div>
         {% endif %}
+
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

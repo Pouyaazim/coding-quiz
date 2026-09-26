@@ -1,96 +1,42 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>ورود</title>
-    <style>
-        body {
-            font-family: Tahoma, sans-serif;
-            background: #0f172a;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .card {
-            background: #1e293b;
-            padding: 40px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #94a3b8;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: white;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #2563eb;
-        }
-        .error {
-            background: #7f1d1d;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            color: #fecaca;
-        }
-        .link {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .link a {
-            color: #60a5fa;
-        }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>ورود</h1>
+{% extends "base.html" %}
+
+{% block title %}ورود — Coding Quiz{% endblock %}
+{% block container_class %}container-narrow{% endblock %}
+
+{% block content %}
+<div class="glass-card tilt-card reveal-scale" style="padding: 50px 40px; max-width: 480px; margin: 0 auto;">
+    <div class="tilt-glare"></div>
+    <div class="tilt-inner">
+
+        <h1 class="hero-title text-shimmer reveal" style="font-size: 2.2rem;">
+            ورود 🎮
+        </h1>
+        <p class="hero-subtitle reveal" style="transition-delay: 0.1s;">خوش برگشتی!</p>
 
         {% if error %}
-        <div class="error">{{ error }}</div>
+            <div class="alert alert-error reveal" style="transition-delay: 0.15s;">⚠️ {{ error }}</div>
         {% endif %}
 
         <form method="POST" action="/login">
-            <label>نام کاربری</label>
-            <input type="text" name="username" required>
+            <div class="input-group reveal" style="transition-delay: 0.2s;">
+                <label class="input-label">نام کاربری</label>
+                <input type="text" name="username" class="input" required autofocus>
+            </div>
 
-            <label>رمز عبور</label>
-            <input type="password" name="password" required>
+            <div class="input-group reveal" style="transition-delay: 0.3s;">
+                <label class="input-label">رمز عبور</label>
+                <input type="password" name="password" class="input" required>
+            </div>
 
-            <button type="submit">ورود</button>
+            <button type="submit" class="btn btn-primary btn-block btn-lg btn-shine glow-pulse reveal" style="transition-delay: 0.4s;">
+                ورود
+            </button>
         </form>
 
-        <div class="link">
-            حساب نداری؟ <a href="/register">ثبت‌نام کن</a>
-        </div>
+        <p class="text-center mt-3 text-secondary reveal" style="transition-delay: 0.5s;">
+            حساب نداری؟ <a href="/register" class="link">ثبت‌نام کن</a>
+        </p>
+
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
