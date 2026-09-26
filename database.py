@@ -1,35 +1,25 @@
 import os
 from pathlib import Path
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
+# 1. خواندن آدرس دیتابیس از متغیرهای محیطی (برای Pxxl)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# مسیر پوشه‌ای که این فایل توشه
-BASE_DIR = Path(__file__).resolve().parent
+# 2. اگر متغیر محیطی وجود نداشت، از SQLite برای اجرای لوکال استفاده کن
+if not DATABASE_URL:
+    BASE_DIR = Path(__file__).resolve().parent
+    DATABASE_URL = f"sqlite:///{BASE_DIR / 'quiz.db'}"
 
-# اگه رو Pxxl هستیم و پوشه read-only بود، از /tmp استفاده کن
-try:
-    test_file = BASE_DIR / ".write_test"
-    test_file.touch()
-    test_file.unlink()
-    DB_PATH = BASE_DIR / "quiz.db"
-except (OSError, PermissionError):
-    DB_PATH = Path("/tmp") / "quiz.db"
-
-DATABASE_URL = f"sqlite:///{DB_PATH}"
-
-print(f"Database path: {DB_PATH}")
-
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
-)
+# 3. ساخت موتور دیتابیس
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    # برای PostgreSQL، به آرگومان‌های اضافی نیازی نیست
+    engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-
 Base = declarative_base()
-
 
 def get_db():
     db = SessionLocal()
