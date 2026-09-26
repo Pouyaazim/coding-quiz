@@ -199,8 +199,8 @@
                     </div>
 
                     <div class="avatar">
-                        {% if item.user.avatar %}
-                            <img src="/static/avatars/{{ item.user.avatar }}" alt="avatar">
+                        {% if item.user.avatar_data %}
+                            <img src="/avatar/{{ item.user.id }}" alt="avatar">
                         {% else %}
                             {{ item.user.username[0] | upper }}
                         {% endif %}

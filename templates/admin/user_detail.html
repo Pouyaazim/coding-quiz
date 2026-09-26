@@ -207,8 +207,8 @@
 <!-- Header -->
 <div class="header-card">
     <div class="avatar">
-        {% if target.avatar %}
-            <img src="/static/avatars/{{ target.avatar }}" alt="avatar">
+        {% if target.avatar_data %}
+            <img src="/avatar/{{ target.id }}" alt="avatar">
         {% else %}
             {{ target.username[0] | upper }}
         {% endif %}

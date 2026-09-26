@@ -186,8 +186,8 @@
             <!-- Avatar -->
             <div class="avatar-section">
                 <div class="avatar-preview">
-                    {% if user.avatar %}
-                        <img src="/static/avatars/{{ user.avatar }}" alt="avatar">
+                    {% if user.avatar_data %}
+                        <img src="/avatar/{{ user.id }}" alt="avatar">
                     {% else %}
                         {{ user.username[0] | upper }}
                     {% endif %}
@@ -195,7 +195,7 @@
                 <div class="avatar-controls">
                     <label>عکس پروفایل</label>
                     <input type="file" name="avatar" accept="image/*">
-                    {% if user.avatar %}
+                    {% if user.avatar_data %}
                     <label class="checkbox-line">
                         <input type="checkbox" name="remove_avatar" value="yes">
                         حذف عکس فعلی
