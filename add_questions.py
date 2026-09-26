@@ -1,11 +1,6 @@
 from database import SessionLocal
 from models import Question
 
-db = SessionLocal()
-
-# همه سوالات موجود رو بگیر (فقط متن‌هاشون)
-existing_texts = {q.text for q in db.query(Question).all()}
-print(f"Existing questions: {len(existing_texts)}")
 
 questions = [
     # ==================== PYTHON BASICS ====================
@@ -917,19 +912,24 @@ questions = [
     },
 ]
 
-added = 0
-skipped = 0
 
-for q in questions:
-    if q["text"] in existing_texts:
-        skipped += 1
-        continue
-    db.add(Question(**q))
-    added += 1
+if __name__ == "__main__":
+    db = SessionLocal()
+    existing_texts = {q.text for q in db.query(Question).all()}
+    print(f"Existing questions: {len(existing_texts)}")
 
-db.commit()
-db.close()
+    added = 0
+    skipped = 0
 
-print(f"Added: {added}")
-print(f"Skipped (already exists): {skipped}")
-print(f"Total questions now in DB: {len(existing_texts) + added}")
+    for q in questions:
+        if q["text"] in existing_texts:
+            skipped += 1
+            continue
+        db.add(Question(**q))
+        added += 1
+
+    db.commit()
+    db.close()
+
+    print(f"Added: {added}")
+    print(f"Skipped (already exists): {skipped}")

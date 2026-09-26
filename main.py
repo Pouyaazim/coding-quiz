@@ -1,18 +1,61 @@
+from pathlib import Path
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request, Depends
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy.orm import Session
-from database import get_db
-from models import User
+
+from database import get_db, Base, engine, SessionLocal
+from models import User, Question
 from leveling import level_progress
 from routers import auth_routes, quiz_routes, admin_routes, profile_routes
-from fastapi.staticfiles import StaticFiles
-from pathlib import Path
 
-app = FastAPI()
-# پوشه static رو mount کن
-Path("static/avatars").mkdir(parents=True, exist_ok=True)
+
+def init_database():
+    """ساخت جدول‌ها و اضافه کردن سوالات پیش‌فرض اگه دیتابیس خالیه"""
+    from add_questions import questions as seed_questions
+
+    # ساخت پوشه avatars
+    Path("static/avatars").mkdir(parents=True, exist_ok=True)
+
+    # ساخت جدول‌ها
+    Base.metadata.create_all(bind=engine)
+
+    # چک کن اگه هیچ سوالی نیست، از seed اضافه کن
+    db = SessionLocal()
+    try:
+        count = db.query(Question).count()
+        if count == 0:
+            print("No questions found, seeding initial questions...")
+            for q in seed_questions:
+                db.add(Question(**q))
+            db.commit()
+            print(f"Seeded {len(seed_questions)} questions.")
+        else:
+            print(f"Database already has {count} questions.")
+    finally:
+        db.close()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # این کد موقع بالا اومدن سرور اجرا میشه
+    print("Starting up...")
+    init_database()
+    print("Startup complete!")
+    yield
+    # این کد موقع خاموش شدن اجرا میشه
+    print("Shutting down...")
+
+
+app = FastAPI(lifespan=lifespan)
+
+# mount static
+Path("static").mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
 app.add_middleware(SessionMiddleware, secret_key="my-super-secret-key-change-me-12345")
 
 templates = Jinja2Templates(directory="templates")
