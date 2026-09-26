@@ -64,7 +64,6 @@
     .role-writer { background: #0284c7; }
     .role-admin { background: #7c3aed; }
 
-    /* Stats */
     .stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -93,7 +92,6 @@
     .stat-card.yellow .stat-value { color: #fbbf24; }
     .stat-card.purple .stat-value { color: #c084fc; }
 
-    /* Level */
     .level-box {
         background: #1e293b;
         padding: 25px;
@@ -134,7 +132,6 @@
         color: #64748b;
     }
 
-    /* Section */
     .section {
         background: #1e293b;
         padding: 25px;
@@ -149,7 +146,6 @@
         margin-bottom: 20px;
     }
 
-    /* Table */
     table { width: 100%; border-collapse: collapse; }
     th, td {
         padding: 12px;
@@ -179,7 +175,6 @@
         color: #94a3b8;
     }
 
-    /* Action buttons */
     .actions {
         display: flex;
         gap: 10px;
@@ -198,13 +193,10 @@
     }
     .btn-gray { background: #475569; }
     .btn-gray:hover { background: #334155; }
-    .btn-red { background: #dc2626; }
-    .btn-red:hover { background: #b91c1c; }
 </style>
 
 <a href="/admin/users" class="back-link">← بازگشت به لیست کاربران</a>
 
-<!-- Header -->
 <div class="header-card">
     <div class="avatar">
         {% if target.avatar_data %}
@@ -221,7 +213,6 @@
     </div>
 </div>
 
-<!-- Stats -->
 <div class="stats">
     <div class="stat-card purple">
         <div class="stat-value">#{{ rank }}</div>
@@ -249,7 +240,6 @@
     </div>
 </div>
 
-<!-- Level -->
 <div class="level-box">
     <div class="level-header">
         <span class="level-badge">سطح {{ progress.level }}</span>
@@ -273,7 +263,6 @@
 </div>
 {% endif %}
 
-<!-- Recent attempts -->
 <div class="section">
     <h2>📋 آخرین تلاش‌ها</h2>
     {% if recent_attempts %}
@@ -304,7 +293,6 @@
     {% endif %}
 </div>
 
-<!-- Actions -->
 <div class="actions">
     <a href="/admin/users" class="btn btn-gray">← بازگشت</a>
 </div>

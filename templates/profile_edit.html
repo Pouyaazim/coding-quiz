@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>ویرایش پروفایل</title>
-    <link rel="icon" href="https://emojicons.dev/🕹️" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <style>
         body {
             font-family: Tahoma, sans-serif;
@@ -60,7 +60,6 @@
             margin-bottom: 18px;
         }
 
-        /* Avatar section */
         .avatar-section {
             display: flex;
             align-items: center;
@@ -183,7 +182,6 @@
 
         <form method="POST" action="/profile/edit" enctype="multipart/form-data">
 
-            <!-- Avatar -->
             <div class="avatar-section">
                 <div class="avatar-preview">
                     {% if user.avatar_data %}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Coding Quiz</title>
-    <link rel="icon" href="https://emojicons.dev/🕹️" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <style>
         body {
             font-family: Tahoma, sans-serif;
@@ -43,9 +43,7 @@
             border-radius: 10px;
             font-size: 1rem;
         }
-        a:hover {
-            background: #2563eb;
-        }
+        a:hover { background: #2563eb; }
         .gray { background: #475569; }
         .gray:hover { background: #334155; }
         .green { background: #16a34a; }
@@ -55,7 +53,33 @@
         .sky { background: #0ea5e9; }
         .sky:hover { background: #0284c7; }
 
-        /* Level box */
+        .welcome {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .avatar-small {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            overflow: hidden;
+            border: 3px solid #334155;
+            flex-shrink: 0;
+        }
+        .avatar-small img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         .level-box {
             background: #0f172a;
             padding: 20px;
@@ -80,9 +104,7 @@
             color: #94a3b8;
             font-size: 0.9rem;
         }
-        .xp-text strong {
-            color: #60a5fa;
-        }
+        .xp-text strong { color: #60a5fa; }
         .progress-bar {
             width: 100%;
             height: 12px;
@@ -111,16 +133,16 @@
         <h1>🎮 Coding Quiz</h1>
 
         {% if user %}
-        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px;">
-            <div style="width: 55px; height: 55px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #7c3aed); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; overflow: hidden; border: 3px solid #334155;">
-                {% if user.avatar_data %}
-                    <img src="/avatar/{{ user.id }}" style="width: 100%; height: 100%; object-fit: cover;">
-                {% else %}
-                    {{ user.username[0] | upper }}
-                {% endif %}
+            <div class="welcome">
+                <div class="avatar-small">
+                    {% if user.avatar_data %}
+                        <img src="/avatar/{{ user.id }}" alt="avatar">
+                    {% else %}
+                        {{ user.username[0] | upper }}
+                    {% endif %}
+                </div>
+                <p style="margin: 0;">خوش اومدی، <strong style="color: white;">{{ user.username }}</strong>! 🎉</p>
             </div>
-            <p style="margin: 0;">خوش اومدی، <strong style="color: white;">{{ user.username }}</strong>! 🎉</p>
-        </div>
 
             <div class="level-box">
                 <div class="level-header">

@@ -33,7 +33,6 @@ def get_avatar(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Avatar not found")
 
     try:
-        # فرمت: "data:image/png;base64,XXXXX"
         header, encoded = user.avatar_data.split(",", 1)
         mime = header.split(":")[1].split(";")[0]
         image_bytes = base64.b64decode(encoded)

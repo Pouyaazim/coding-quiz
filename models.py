@@ -44,5 +44,6 @@ class Attempt(Base):
     selected_option = Column(String, nullable=False)
     is_correct = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
     user = relationship("User", back_populates="attempts")
     question = relationship("Question")
