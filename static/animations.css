@@ -369,3 +369,60 @@
         transform: none !important;
     }
 }
+/* ============================================
+   RESPONSIVE — PERFORMANCE ON MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Reduce aurora blur for performance */
+    .aurora-blob {
+        filter: blur(60px) !important;
+    }
+
+    /* Reduce glass card blur */
+    .glass-card {
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+    }
+
+    /* Smaller noise overlay */
+    .aurora-container::after {
+        opacity: 0.02;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Even lighter blur */
+    .aurora-blob {
+        filter: blur(50px) !important;
+        opacity: 0.8 !important;
+    }
+
+    /* Reduce number of blobs (hide 2) */
+    .aurora-blob:nth-child(3),
+    .aurora-blob:nth-child(4) {
+        display: none;
+    }
+
+    /* Disable expensive animations */
+    .text-shimmer {
+        animation: none;
+    }
+
+    /* Tilt off */
+    .tilt-card {
+        transform: none !important;
+        perspective: none !important;
+    }
+
+    .tilt-glare {
+        display: none;
+    }
+}
+
+/* Reduced motion — respect user preference */
+@media (prefers-reduced-motion: reduce) {
+    .aurora-blob {
+        animation: none !important;
+    }
+}
