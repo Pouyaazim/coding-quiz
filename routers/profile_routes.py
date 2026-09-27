@@ -26,6 +26,7 @@ MIME_MAP = {
 MAX_FILE_SIZE = 2 * 1024 * 1024  # 2MB
 
 
+# ==================== AVATAR ====================
 @router.get("/avatar/{user_id}")
 def get_avatar(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -42,6 +43,7 @@ def get_avatar(user_id: int, db: Session = Depends(get_db)):
     return Response(content=image_bytes, media_type=mime)
 
 
+# ==================== PROFILE ====================
 @router.get("/profile")
 def profile(request: Request, db: Session = Depends(get_db)):
     user_id = request.session.get("user_id")
@@ -102,6 +104,7 @@ def profile(request: Request, db: Session = Depends(get_db)):
     )
 
 
+# ==================== PROFILE EDIT ====================
 @router.get("/profile/edit")
 def profile_edit_page(request: Request, db: Session = Depends(get_db)):
     user_id = request.session.get("user_id")
@@ -180,4 +183,74 @@ async def profile_edit(
         request=request,
         name="profile_edit.html",
         context={"user": user, "error": None, "success": "پروفایل با موفقیت ذخیره شد ✅"},
+    )
+
+
+# ==================== PUBLIC PROFILE ====================
+@router.get("/u/{username}")
+def public_profile(
+    username: str,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    current_user_id = request.session.get("user_id")
+    if not current_user_id:
+        return RedirectResponse(url="/login", status_code=303)
+
+    target = db.query(User).filter(User.username == username).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="کاربر پیدا نشد")
+
+    current_user = db.query(User).filter(User.id == current_user_id).first()
+    if current_user and current_user.id == target.id:
+        return RedirectResponse(url="/profile", status_code=303)
+
+    total_attempts = db.query(Attempt).filter(Attempt.user_id == target.id).count()
+    correct_attempts = db.query(Attempt).filter(
+        Attempt.user_id == target.id, Attempt.is_correct == True
+    ).count()
+    wrong_attempts = total_attempts - correct_attempts
+    accuracy = round((correct_attempts / total_attempts) * 100, 1) if total_attempts > 0 else 0
+
+    higher_count = db.query(User).filter(User.xp > target.xp).count()
+    rank = higher_count + 1
+    total_users = db.query(User).count()
+    progress = level_progress(target.xp)
+
+    best_category = (
+        db.query(
+            Question.category,
+            func.count(Attempt.id).label("count"),
+        )
+        .join(Attempt)
+        .filter(Attempt.user_id == target.id, Attempt.is_correct == True)
+        .group_by(Question.category)
+        .order_by(func.count(Attempt.id).desc())
+        .first()
+    )
+
+    recent_attempts = (
+        db.query(Attempt)
+        .filter(Attempt.user_id == target.id)
+        .order_by(Attempt.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="public_profile.html",
+        context={
+            "user": current_user,
+            "target": target,
+            "progress": progress,
+            "total_attempts": total_attempts,
+            "correct_attempts": correct_attempts,
+            "wrong_attempts": wrong_attempts,
+            "accuracy": accuracy,
+            "rank": rank,
+            "total_users": total_users,
+            "recent_attempts": recent_attempts,
+            "best_category": best_category.category if best_category else None,
+        },
     )
